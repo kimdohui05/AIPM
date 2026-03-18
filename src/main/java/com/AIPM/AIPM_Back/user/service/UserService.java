@@ -22,26 +22,32 @@ public class UserService {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new IllegalArgumentException("이미 사용중인 이메일입니다.");
         }
+        if (userRepository.existsByUserId(request.getUserId())) {
+            throw new IllegalArgumentException("이미 사용중인 아이디입니다.");
+        }
 
         User user = User.builder()
+                .userId(request.getUserId())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
+                .name(request.getName())
                 .nickname(request.getNickname())
+                .profileImage(request.getProfileImage())
                 .build();
 
         userRepository.save(user);
     }
 
     public TokenDto login(LoginDto request) {
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 이메일입니다."));
+        // 아이디로 유저 찾기
+        User user = userRepository.findByUserId(request.getId())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 아이디입니다."));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
 
         String token = jwtUtil.generateToken(user.getEmail(), user.getUuid());
-
         return new TokenDto(token, user.getUuid(), user.getNickname());
     }
 }
