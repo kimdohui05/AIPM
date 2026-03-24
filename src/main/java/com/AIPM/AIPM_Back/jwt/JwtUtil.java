@@ -15,13 +15,16 @@ public class JwtUtil {
 
     private final SecretKey secretKey;
     private final long expirationMs;
+    private final long refreshExpirationMs;
 
     public JwtUtil(
             @Value("${jwt.secret}") String secret,
-            @Value("${jwt.expiration}") long expirationMs
+            @Value("${jwt.expiration}") long expirationMs,
+            @Value("${jwt.refresh-expiration}") long refreshExpirationMs
     ) {
         this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         this.expirationMs = expirationMs;
+        this.refreshExpirationMs = refreshExpirationMs;
     }
 
     public String generateToken(String email, String uuid) {
@@ -30,6 +33,15 @@ public class JwtUtil {
                 .claim("uuid", uuid)
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + expirationMs))
+                .signWith(secretKey)
+                .compact();
+    }
+
+    public String generateRefreshToken(String uuid) {
+        return Jwts.builder()
+                .subject(uuid)
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis() + refreshExpirationMs))
                 .signWith(secretKey)
                 .compact();
     }

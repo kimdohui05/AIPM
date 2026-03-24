@@ -1,4 +1,4 @@
-package com.AIPM.AIPM_Back.user.dto;
+package com.AIPM.AIPM_Back.token.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -6,7 +6,8 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class TokenDto {
-    private String token;
+    private String accessToken;
+    private String refreshToken;
     private String uuid;
     private String nickname;
 }

@@ -23,11 +23,11 @@ public class User {
     @Column(nullable = false, unique = true, updatable = false)
     private String uuid = UUID.randomUUID().toString();
 
-    @Column(unique = true, length = 50)
-    private String userId; // 로그인 아이디 (이메일과 별개)
+    @Column(unique = true, length = 20)
+    private String userId;
 
-    @Column(length = 50)
-    private String name; // 실명
+    @Column(length = 5)
+    private String name;
 
     @Column(length = 10)
     private String nickname;

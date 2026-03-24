@@ -2,7 +2,11 @@ package com.AIPM.AIPM_Back.user.controller;
 
 import com.AIPM.AIPM_Back.user.dto.LoginDto;
 import com.AIPM.AIPM_Back.user.dto.RegisterDto;
-import com.AIPM.AIPM_Back.user.dto.TokenDto;
+import com.AIPM.AIPM_Back.token.dto.TokenDto;
+import com.AIPM.AIPM_Back.token.service.TokenService;
+import com.AIPM.AIPM_Back.jwt.JwtUtil;
+import com.AIPM.AIPM_Back.user.entity.User;
+import com.AIPM.AIPM_Back.user.repository.UserRepository;
 import com.AIPM.AIPM_Back.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +18,9 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
+    private final TokenService tokenService;
+    private final JwtUtil jwtUtil;
+    private final UserRepository userRepository;
 
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody RegisterDto request) {
@@ -25,6 +32,29 @@ public class UserController {
     public ResponseEntity<TokenDto> login(@RequestBody LoginDto request) {
         TokenDto token = userService.login(request);
         return ResponseEntity.ok(token);
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<TokenDto> refresh(@RequestHeader("Refresh-Token") String refreshToken) {
+        if (!jwtUtil.isTokenValid(refreshToken)) {
+            return ResponseEntity.status(401).build();
+        }
+
+        String uuid = jwtUtil.getEmail(refreshToken);
+
+        if (!tokenService.isRefreshTokenValid(uuid, refreshToken)) {
+            return ResponseEntity.status(401).build();
+        }
+
+        User user = userRepository.findByUuid(uuid)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
+
+        String newAccessToken = jwtUtil.generateToken(user.getEmail(), uuid);
+        String newRefreshToken = jwtUtil.generateRefreshToken(uuid);
+
+        tokenService.saveRefreshToken(uuid, newRefreshToken);
+
+        return ResponseEntity.ok(new TokenDto(newAccessToken, newRefreshToken, uuid, user.getNickname()));
     }
 
     @GetMapping("/test")
