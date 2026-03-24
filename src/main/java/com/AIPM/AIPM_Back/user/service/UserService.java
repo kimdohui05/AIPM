@@ -41,7 +41,7 @@ public class UserService {
     }
 
     public TokenDto login(LoginDto request) {
-        User user = userRepository.findByUserId(request.getId())
+        User user = userRepository.findByUserId(request.getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 아이디입니다."));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
