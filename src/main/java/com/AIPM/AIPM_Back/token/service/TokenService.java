@@ -20,7 +20,10 @@ public class TokenService {
 
     @Transactional
     public void saveRefreshToken(String uuid, String refreshToken) {
-        tokenRepository.findByUuid(uuid).ifPresent(tokenRepository::delete);
+        tokenRepository.findByUuid(uuid).ifPresent(token -> {
+            tokenRepository.delete(token);
+            tokenRepository.flush();
+        });
 
         TokenEntity token = TokenEntity.builder()
                 .uuid(uuid)
