@@ -3,6 +3,8 @@ package com.AIPM.AIPM_Back.user.service;
 import com.AIPM.AIPM_Back.jwt.JwtUtil;
 import com.AIPM.AIPM_Back.user.dto.LoginDto;
 import com.AIPM.AIPM_Back.user.dto.RegisterDto;
+import com.AIPM.AIPM_Back.user.dto.UserProfileDto;
+import com.AIPM.AIPM_Back.user.dto.UserUpdateDto;
 import com.AIPM.AIPM_Back.token.dto.TokenDto;
 import com.AIPM.AIPM_Back.token.service.TokenService;
 import com.AIPM.AIPM_Back.user.entity.User;
@@ -10,6 +12,7 @@ import com.AIPM.AIPM_Back.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -54,5 +57,38 @@ public class UserService {
         tokenService.saveRefreshToken(user.getUuid(), refreshToken);
 
         return new TokenDto(accessToken, refreshToken, user.getUuid(), user.getNickname());
+    }
+
+    public UserProfileDto getProfile(String uuid) {
+        User user = userRepository.findByUuid(uuid)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
+        return new UserProfileDto(user);
+    }
+
+    @Transactional
+    public UserProfileDto updateProfile(String uuid, UserUpdateDto request) {
+        User user = userRepository.findByUuid(uuid)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
+
+        User updated = User.builder()
+                .id(user.getId())
+                .uuid(user.getUuid())
+                .userId(user.getUserId())
+                .email(user.getEmail())
+                .password(user.getPassword())
+                .provider(user.getProvider())
+                .providerId(user.getProviderId())
+                .teamId(user.getTeamId())
+                .name(request.getName() != null ? request.getName() : user.getName())
+                .nickname(request.getNickname() != null ? request.getNickname() : user.getNickname())
+                .profileImage(request.getProfileImage() != null ? request.getProfileImage() : user.getProfileImage())
+                .organizationId(request.getOrganizationId() != null ? request.getOrganizationId() : user.getOrganizationId())
+                .departmentId(request.getDepartmentId() != null ? request.getDepartmentId() : user.getDepartmentId())
+                .position(request.getPosition() != null ? request.getPosition() : user.getPosition())
+                .portfolio(request.getPortfolio() != null ? request.getPortfolio() : user.getPortfolio())
+                .build();
+
+        userRepository.save(updated);
+        return new UserProfileDto(updated);
     }
 }

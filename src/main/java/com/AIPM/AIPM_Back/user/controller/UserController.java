@@ -2,6 +2,8 @@ package com.AIPM.AIPM_Back.user.controller;
 
 import com.AIPM.AIPM_Back.user.dto.LoginDto;
 import com.AIPM.AIPM_Back.user.dto.RegisterDto;
+import com.AIPM.AIPM_Back.user.dto.UserProfileDto;
+import com.AIPM.AIPM_Back.user.dto.UserUpdateDto;
 import com.AIPM.AIPM_Back.token.dto.TokenDto;
 import com.AIPM.AIPM_Back.token.service.TokenService;
 import com.AIPM.AIPM_Back.jwt.JwtUtil;
@@ -55,6 +57,22 @@ public class UserController {
         tokenService.saveRefreshToken(uuid, newRefreshToken);
 
         return ResponseEntity.ok(new TokenDto(newAccessToken, newRefreshToken, uuid, user.getNickname()));
+    }
+
+    @GetMapping("/profile")
+    public ResponseEntity<UserProfileDto> getProfile(@RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.replace("Bearer ", "");
+        String uuid = jwtUtil.getUuid(token);
+        return ResponseEntity.ok(userService.getProfile(uuid));
+    }
+
+    @PutMapping("/profile")
+    public ResponseEntity<UserProfileDto> updateProfile(
+            @RequestHeader("Authorization") String authHeader,
+            @RequestBody UserUpdateDto request) {
+        String token = authHeader.replace("Bearer ", "");
+        String uuid = jwtUtil.getUuid(token);
+        return ResponseEntity.ok(userService.updateProfile(uuid, request));
     }
 
     @GetMapping("/test")
