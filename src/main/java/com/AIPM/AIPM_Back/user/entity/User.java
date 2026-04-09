@@ -65,4 +65,16 @@ public class User {
 
     @Column(columnDefinition = "TEXT")
     private String portfolio;
+
+    public void updateProfile(String name, String nickname, String profileImage,
+                                  String organizationId, String departmentId,
+                                  String position, String portfolio) {
+        if (name != null) this.name = name;
+        if (nickname != null) this.nickname = nickname;
+        if (profileImage != null) this.profileImage = profileImage;
+        if (organizationId != null) this.organizationId = organizationId;
+        if (departmentId != null) this.departmentId = departmentId;
+        if (position != null) this.position = position;
+        if (portfolio != null) this.portfolio = portfolio;
+    }
 }

@@ -70,25 +70,16 @@ public class UserService {
         User user = userRepository.findByUuid(uuid)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
 
-        User updated = User.builder()
-                .id(user.getId())
-                .uuid(user.getUuid())
-                .userId(user.getUserId())
-                .email(user.getEmail())
-                .password(user.getPassword())
-                .provider(user.getProvider())
-                .providerId(user.getProviderId())
-                .teamId(user.getTeamId())
-                .name(request.getName() != null ? request.getName() : user.getName())
-                .nickname(request.getNickname() != null ? request.getNickname() : user.getNickname())
-                .profileImage(request.getProfileImage() != null ? request.getProfileImage() : user.getProfileImage())
-                .organizationId(request.getOrganizationId() != null ? request.getOrganizationId() : user.getOrganizationId())
-                .departmentId(request.getDepartmentId() != null ? request.getDepartmentId() : user.getDepartmentId())
-                .position(request.getPosition() != null ? request.getPosition() : user.getPosition())
-                .portfolio(request.getPortfolio() != null ? request.getPortfolio() : user.getPortfolio())
-                .build();
+        user.updateProfile(
+                request.getName(),
+                request.getNickname(),
+                request.getProfileImage(),
+                request.getOrganizationId(),
+                request.getDepartmentId(),
+                request.getPosition(),
+                request.getPortfolio()
+        );
 
-        userRepository.save(updated);
-        return new UserProfileDto(updated);
+        return new UserProfileDto(user);
     }
 }
