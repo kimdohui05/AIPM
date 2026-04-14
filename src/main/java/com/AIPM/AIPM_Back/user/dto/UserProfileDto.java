@@ -1,6 +1,6 @@
 package com.AIPM.AIPM_Back.user.dto;
 
-import com.AIPM.AIPM_Back.user.entity.User;
+import com.AIPM.AIPM_Back.user.entity.UserEntity;
 import lombok.Getter;
 
 @Getter
@@ -17,7 +17,7 @@ public class UserProfileDto {
     private final String position;
     private final String portfolio;
 
-    public UserProfileDto(User user) {
+    public UserProfileDto(UserEntity user) {
         this.uuid = user.getUuid();
         this.userId = user.getUserId();
         this.name = user.getName();

@@ -7,7 +7,7 @@ import com.AIPM.AIPM_Back.user.dto.UserProfileDto;
 import com.AIPM.AIPM_Back.user.dto.UserUpdateDto;
 import com.AIPM.AIPM_Back.token.dto.TokenDto;
 import com.AIPM.AIPM_Back.token.service.TokenService;
-import com.AIPM.AIPM_Back.user.entity.User;
+import com.AIPM.AIPM_Back.user.entity.UserEntity;
 import com.AIPM.AIPM_Back.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,6 +23,7 @@ public class UserService {
     private final JwtUtil jwtUtil;
     private final TokenService tokenService;
 
+    @Transactional
     public void signup(RegisterDto request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new IllegalArgumentException("이미 사용중인 이메일입니다.");
@@ -31,7 +32,7 @@ public class UserService {
             throw new IllegalArgumentException("이미 사용중인 아이디입니다.");
         }
 
-        User user = User.builder()
+        UserEntity user = UserEntity.builder()
                 .userId(request.getUserId())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
@@ -44,7 +45,7 @@ public class UserService {
     }
 
     public TokenDto login(LoginDto request) {
-        User user = userRepository.findByUserId(request.getUserId())
+        UserEntity user = userRepository.findByUserId(request.getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 아이디입니다."));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
@@ -60,14 +61,14 @@ public class UserService {
     }
 
     public UserProfileDto getProfile(String uuid) {
-        User user = userRepository.findByUuid(uuid)
+        UserEntity user = userRepository.findByUuid(uuid)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
         return new UserProfileDto(user);
     }
 
     @Transactional
     public UserProfileDto updateProfile(String uuid, UserUpdateDto request) {
-        User user = userRepository.findByUuid(uuid)
+        UserEntity user = userRepository.findByUuid(uuid)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
 
         user.updateProfile(

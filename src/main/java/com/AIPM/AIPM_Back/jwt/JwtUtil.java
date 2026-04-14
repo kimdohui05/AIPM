@@ -58,6 +58,10 @@ public class JwtUtil {
         return parseClaims(token).getSubject();
     }
 
+    public String getSubject(String token) {
+        return parseClaims(token).getSubject();
+    }
+
     public String getUuid(String token) {
         return parseClaims(token).get("uuid", String.class);
     }

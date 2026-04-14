@@ -3,6 +3,7 @@ package com.AIPM.AIPM_Back.ai.controller;
 import com.AIPM.AIPM_Back.ai.dto.TaskGenerateRequestDto;
 import com.AIPM.AIPM_Back.ai.dto.TaskGenerateResponseDto;
 import com.AIPM.AIPM_Back.ai.service.GeminiService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,7 +17,7 @@ public class AiController {
 
     @PostMapping("/generate-tasks")
     public ResponseEntity<TaskGenerateResponseDto> generateTasks(
-            @RequestBody TaskGenerateRequestDto request) {
+            @Valid @RequestBody TaskGenerateRequestDto request) {
         TaskGenerateResponseDto response = geminiService.generateTasks(request);
         return ResponseEntity.ok(response);
     }

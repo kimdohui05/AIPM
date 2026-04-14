@@ -7,7 +7,7 @@ import com.AIPM.AIPM_Back.user.dto.UserUpdateDto;
 import com.AIPM.AIPM_Back.token.dto.TokenDto;
 import com.AIPM.AIPM_Back.token.service.TokenService;
 import com.AIPM.AIPM_Back.jwt.JwtUtil;
-import com.AIPM.AIPM_Back.user.entity.User;
+import com.AIPM.AIPM_Back.user.entity.UserEntity;
 import com.AIPM.AIPM_Back.user.repository.UserRepository;
 import com.AIPM.AIPM_Back.user.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -42,13 +42,13 @@ public class UserController {
             return ResponseEntity.status(401).build();
         }
 
-        String uuid = jwtUtil.getEmail(refreshToken);
+        String uuid = jwtUtil.getSubject(refreshToken);
 
         if (!tokenService.isRefreshTokenValid(uuid, refreshToken)) {
             return ResponseEntity.status(401).build();
         }
 
-        User user = userRepository.findByUuid(uuid)
+        UserEntity user = userRepository.findByUuid(uuid)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
 
         String newAccessToken = jwtUtil.generateToken(user.getEmail(), uuid);
@@ -61,7 +61,10 @@ public class UserController {
 
     @GetMapping("/profile")
     public ResponseEntity<UserProfileDto> getProfile(@RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.replace("Bearer ", "");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(401).build();
+        }
+        String token = authHeader.substring(7);
         String uuid = jwtUtil.getUuid(token);
         return ResponseEntity.ok(userService.getProfile(uuid));
     }
@@ -70,7 +73,10 @@ public class UserController {
     public ResponseEntity<UserProfileDto> updateProfile(
             @RequestHeader("Authorization") String authHeader,
             @RequestBody UserUpdateDto request) {
-        String token = authHeader.replace("Bearer ", "");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(401).build();
+        }
+        String token = authHeader.substring(7);
         String uuid = jwtUtil.getUuid(token);
         return ResponseEntity.ok(userService.updateProfile(uuid, request));
     }
