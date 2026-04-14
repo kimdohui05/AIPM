@@ -12,6 +12,9 @@ import java.util.List;
 @Setter
 public class TaskGenerateRequestDto {
 
+    @NotBlank(message = "프로젝트 UUID는 필수입니다.")
+    private String projectUuid;
+
     @NotBlank(message = "프로젝트명은 필수입니다.")
     private String projectName;
 
@@ -31,6 +34,9 @@ public class TaskGenerateRequestDto {
     @Getter
     @Setter
     public static class MemberInfoDto {
+
+        @NotBlank(message = "팀원 UUID는 필수입니다.")
+        private String userUuid;
 
         @NotBlank(message = "팀원 이름은 필수입니다.")
         private String name;
