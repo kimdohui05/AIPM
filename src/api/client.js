@@ -17,7 +17,7 @@ client.interceptors.request.use((config) => {
   return config
 })
 
-// 응답 인터셉터 - 401 시 리프레시 토큰으로 자동 갱신
+// 응답 인터셉터 - 401 시 리프레시 토큰으로 자동 갱신1
 client.interceptors.response.use(
   (response) => response,
   async (error) => {
