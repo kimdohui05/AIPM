@@ -5,6 +5,7 @@ import styles from './IntegrationPage.module.css'
 export default function IntegrationPage() {
   const navigate = useNavigate()
 
+  // 5. github, notion만 남기기
   const [integrations, setIntegrations] = useState([
     {
       id: 'github',
@@ -16,15 +17,6 @@ export default function IntegrationPage() {
       placeholder: 'GitHub 레포지토리 URL',
     },
     {
-      id: 'slack',
-      name: 'Slack',
-      icon: '💬',
-      desc: '프로젝트 알림과 AI 피드백을 Slack 채널로 받습니다.',
-      connected: false,
-      value: '',
-      placeholder: 'Slack Webhook URL',
-    },
-    {
       id: 'notion',
       name: 'Notion',
       icon: '📝',
@@ -32,15 +24,6 @@ export default function IntegrationPage() {
       connected: false,
       value: '',
       placeholder: 'Notion API Key',
-    },
-    {
-      id: 'jira',
-      name: 'Jira',
-      icon: '📋',
-      desc: 'Jira 이슈를 태스크와 자동으로 연동합니다.',
-      connected: false,
-      value: '',
-      placeholder: 'Jira Project URL',
     },
   ])
 
@@ -72,10 +55,22 @@ export default function IntegrationPage() {
   return (
     <div className={styles.container}>
 
-      {/* 헤더 */}
+      {/* 6. 헤더 - 로고 눌러서 돌아가기 */}
       <header className={styles.header}>
         <div className={styles.headerLeft}>
-          <button className={styles.backBtn} onClick={() => navigate('/dashboard')}>←</button>
+          <div
+            className={styles.logoBtn}
+            onClick={() => navigate('/dashboard')}
+            style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
+          >
+            <div style={{
+              width: '28px', height: '28px', borderRadius: '7px',
+              background: 'linear-gradient(135deg, #3BBFD4, #1E9CB5)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px'
+            }}>🤖</div>
+            <span style={{ fontSize: '15px', fontWeight: 700, color: '#0F2A31' }}>AI PM</span>
+            <span style={{ fontSize: '9px', fontWeight: 600, background: '#3BBFD4', color: '#fff', padding: '2px 6px', borderRadius: '4px' }}>BETA</span>
+          </div>
           <div>
             <h1 className={styles.headerTitle}>연동 설정</h1>
             <p className={styles.headerSub}>외부 서비스를 연결해 더 효율적으로 관리하세요</p>
@@ -128,7 +123,6 @@ export default function IntegrationPage() {
                 </div>
               </div>
 
-              {/* 연동 입력 폼 */}
               {editing === item.id && (
                 <div className={styles.inputWrap}>
                   <input
@@ -146,14 +140,12 @@ export default function IntegrationPage() {
                 </div>
               )}
 
-              {/* 연동된 경우 값 표시 */}
               {item.connected && editing !== item.id && (
                 <div className={styles.connectedValue}>
                   <span>🔗 {item.value}</span>
                 </div>
               )}
 
-              {/* 버튼 */}
               <div className={styles.integrationFooter}>
                 {item.connected ? (
                   <>

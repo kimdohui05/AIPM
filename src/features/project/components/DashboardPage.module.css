@@ -280,3 +280,103 @@
 .projectInfo { flex: 1; }
 .projectName { font-size: 13px; font-weight: 600; color: #0F2A31; }
 .projectMeta { font-size: 11px; color: #9BBEC5; margin-top: 2px; }
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+  .app {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    display: none;
+  }
+
+  .main {
+    width: 100%;
+  }
+
+  .header {
+    padding: 12px 16px;
+    height: auto;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .headerRight {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .btnGhost, .btnPrimary {
+    font-size: 11px;
+    padding: 6px 10px;
+  }
+
+  .content {
+    padding: 16px;
+    gap: 14px;
+  }
+
+  .aiBanner {
+    flex-direction: column;
+    gap: 14px;
+    padding: 18px;
+  }
+
+  .bannerTitle {
+    font-size: 15px;
+  }
+
+  .bannerActions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .btnAi, .btnOutlineWhite {
+    flex: 1;
+    justify-content: center;
+    text-align: center;
+    font-size: 12px;
+    padding: 8px 12px;
+  }
+
+  .statsRow {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .statValue {
+    font-size: 20px;
+  }
+
+  .twoCol {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .cardHeader {
+    padding: 13px 14px 10px;
+  }
+
+  .cardBody {
+    padding: 4px 14px;
+  }
+
+  .panel {
+    width: 100%;
+  }
+}
+
+@media (max-width: 400px) {
+  .statsRow {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .statCard {
+    padding: 12px 12px;
+  }
+
+  .bannerTitle {
+    font-size: 13px;
+  }
+}

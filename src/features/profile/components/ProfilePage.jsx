@@ -15,12 +15,6 @@ export default function ProfilePage() {
   })
   const [loading, setLoading] = useState(false)
   const [fetchLoading, setFetchLoading] = useState(true)
-  const [passwordForm, setPasswordForm] = useState({
-    currentPassword: '',
-    newPassword: '',
-    newPasswordConfirm: '',
-  })
-  const [pwLoading, setPwLoading] = useState(false)
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -46,10 +40,6 @@ export default function ProfilePage() {
     setForm({ ...form, [e.target.name]: e.target.value })
   }
 
-  const handlePasswordChange = (e) => {
-    setPasswordForm({ ...passwordForm, [e.target.name]: e.target.value })
-  }
-
   const handleProfileSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
@@ -69,42 +59,32 @@ export default function ProfilePage() {
     }
   }
 
-  const handlePasswordSubmit = async (e) => {
-    e.preventDefault()
-    if (passwordForm.newPassword !== passwordForm.newPasswordConfirm) {
-      alert('새 비밀번호가 일치하지 않습니다.')
-      return
-    }
-    setPwLoading(true)
-    try {
-      // 나중에 백엔드 연결
-      navigate('/dashboard', { state: { openProfile: true } })
-      alert('비밀번호가 변경됐습니다!')
-      setPasswordForm({ currentPassword: '', newPassword: '', newPasswordConfirm: '' })
-    } catch (error) {
-      alert('비밀번호 변경에 실패했습니다.')
-    } finally {
-      setPwLoading(false)
-    }
-  }
-
   if (fetchLoading) return <div>로딩 중...</div>
 
   return (
     <div className={styles.container}>
 
-      {/* 헤더 */}
-        <header className={styles.header}>
-          <div className={styles.headerLeft}>
-            <button className={styles.backBtn} onClick={() => navigate(-1)}>
-              ← 돌아가기
-            </button>
-            <div>
-              <h1 className={styles.headerTitle}>내 정보</h1>
-              <p className={styles.headerSub}>프로필 및 계정 설정</p>
-            </div>
+      {/* 7. 헤더 - 로고 눌러서 돌아가기 */}
+      <header className={styles.header}>
+        <div className={styles.headerLeft}>
+          <div
+            onClick={() => navigate('/dashboard')}
+            style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
+          >
+            <div style={{
+              width: '28px', height: '28px', borderRadius: '7px',
+              background: 'linear-gradient(135deg, #3BBFD4, #1E9CB5)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px'
+            }}>🤖</div>
+            <span style={{ fontSize: '15px', fontWeight: 700, color: '#0F2A31' }}>AI PM</span>
+            <span style={{ fontSize: '9px', fontWeight: 600, background: '#3BBFD4', color: '#fff', padding: '2px 6px', borderRadius: '4px' }}>BETA</span>
           </div>
-        </header>
+          <div>
+            <h1 className={styles.headerTitle}>내 정보</h1>
+            <p className={styles.headerSub}>프로필 및 계정 설정</p>
+          </div>
+        </div>
+      </header>
 
       <div className={styles.content}>
 
@@ -115,7 +95,6 @@ export default function ProfilePage() {
           </div>
           <div className={styles.cardBody}>
 
-            {/* 프로필 사진 */}
             <div className={styles.avatarSection}>
               <div className={styles.avatar}>
                 {nickname.charAt(0) || '?'}
@@ -186,54 +165,8 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* 비밀번호 변경 카드 */}
-        <div className={styles.card}>
-          <div className={styles.cardHeader}>
-            <span className={styles.cardTitle}>비밀번호 변경</span>
-          </div>
-          <div className={styles.cardBody}>
-            <form onSubmit={handlePasswordSubmit} className={styles.form}>
-              <div className={styles.formGroup}>
-                <label>현재 비밀번호</label>
-                <input
-                  type="password"
-                  name="currentPassword"
-                  value={passwordForm.currentPassword}
-                  onChange={handlePasswordChange}
-                  placeholder="현재 비밀번호를 입력하세요"
-                  required
-                />
-              </div>
-              <div className={styles.formGroup}>
-                <label>새 비밀번호</label>
-                <input
-                  type="password"
-                  name="newPassword"
-                  value={passwordForm.newPassword}
-                  onChange={handlePasswordChange}
-                  placeholder="새 비밀번호를 입력하세요"
-                  required
-                />
-              </div>
-              <div className={styles.formGroup}>
-                <label>새 비밀번호 확인</label>
-                <input
-                  type="password"
-                  name="newPasswordConfirm"
-                  value={passwordForm.newPasswordConfirm}
-                  onChange={handlePasswordChange}
-                  placeholder="새 비밀번호를 다시 입력하세요"
-                  required
-                />
-              </div>
-              <div className={styles.btnRight}>
-                <button type="submit" disabled={pwLoading} className={styles.submitBtn}>
-                  {pwLoading ? '변경 중...' : '비밀번호 변경'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+        {/* 8. 비밀번호 변경 카드 제거 */}
+
       </div>
     </div>
   )

@@ -18,7 +18,6 @@ export default function DashboardPage() {
   const [profile, setProfile] = useState(null)
   const nickname = localStorage.getItem('nickname') || '사용자'
 
-  // 가장 최근에 접근한 프로젝트 UUID 반환, 없으면 마지막 프로젝트
   const currentProjectUuid = (projectList) => {
     const stored = localStorage.getItem('currentProjectUuid')
     if (stored && projectList.some(p => p.uuid === stored)) return stored
@@ -102,6 +101,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
+        {/* 1. 내 정보 보기 아래로 내림 */}
         <div className={styles.sidebarBottom}>
           <div className={styles.userInfo} onClick={() => setShowProfile(true)}>
             <div className={styles.userAvatar}>{nickname.charAt(0)}</div>
@@ -122,46 +122,13 @@ export default function DashboardPage() {
               {new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' })}
             </div>
           </div>
+          {/* 2. 새 프로젝트 버튼 제거 */}
           <div className={styles.headerRight}>
             <button className={styles.btnGhost}>🔔 알림</button>
-            <button className={styles.btnPrimary} onClick={() => navigate('/projects/new')}>
-              ＋ 새 프로젝트
-            </button>
           </div>
         </header>
 
         <div className={styles.content}>
-
-          <div className={styles.aiBanner}>
-            <div>
-              <div className={styles.bannerLabel}>✦ AI PM</div>
-              <div className={styles.bannerTitle}>
-                {projects.length > 0
-                  ? `${projects.length}개 프로젝트가 진행 중이에요`
-                  : '프로젝트를 생성하고 AI 분석을 시작해보세요'}
-              </div>
-              <div className={styles.bannerDesc}>
-                {projects.length > 0
-                  ? `총 ${allTasks.length}개 태스크 · 완료 ${doneTasks.length}개`
-                  : '새 프로젝트를 만들면 AI가 자동으로 태스크를 생성하고 분석합니다.'}
-              </div>
-            </div>
-            <div className={styles.bannerActions}>
-              <button
-                className={styles.btnAi}
-                onClick={() => projects.length > 0 && navigate(`/projects/${currentProjectUuid(projects)}/risks`)}
-              >
-                <span className={styles.aiDot} />
-                AI 분석 보기
-              </button>
-              <button
-                className={styles.btnOutlineWhite}
-                onClick={() => projects.length > 0 && navigate(`/projects/${currentProjectUuid(projects)}/reports`)}
-              >
-                보고서 생성
-              </button>
-            </div>
-          </div>
 
           {/* 통계 카드 */}
           <div className={styles.statsRow}>
@@ -234,77 +201,53 @@ export default function DashboardPage() {
             </div>
           )}
 
-          <div className={styles.twoCol}>
-
-            {/* 진행 중인 태스크 */}
-            <div className={styles.card}>
-              <div className={styles.cardHeader}>
-                <span className={styles.cardTitle}>📋 진행 중인 태스크</span>
-                <button
-                  className={styles.btnGhost}
-                  style={{ fontSize: '12px', padding: '5px 12px' }}
-                  onClick={() => projects.length > 0 && navigate(`/projects/${currentProjectUuid(projects)}/tasks`)}
-                >
-                  전체 보기
-                </button>
-              </div>
-              <div className={styles.cardBody}>
-                {inProgressTasks.length === 0 ? (
-                  <div className={styles.emptyState}>
-                    <span>✅</span>
-                    <p>진행 중인 태스크가 없습니다</p>
-                    {projects.length > 0 ? (
-                      <button className={styles.emptyBtn} onClick={() => navigate(`/projects/${currentProjectUuid(projects)}/tasks`)}>
-                        태스크 보러가기
-                      </button>
-                    ) : (
-                      <button className={styles.emptyBtn} onClick={() => navigate('/projects/new')}>
-                        프로젝트 생성하기
-                      </button>
-                    )}
-                  </div>
-                ) : (
-                  inProgressTasks.slice(0, 4).map((task, i) => (
-                    <div key={i} className={styles.taskItem}
-                      onClick={() => navigate(`/projects/${task.projectId}/tasks`)}
-                      style={{ cursor: 'pointer' }}
-                    >
-                      <div className={`${styles.taskCheck} ${styles.activeCheck}`} />
-                      <div className={styles.taskInfo}>
-                        <div className={styles.taskName}>{task.title}</div>
-                        <div className={styles.taskMeta}>{task.projectName} · {task.dueDate}</div>
-                      </div>
-                      <div className={styles.taskRight}>
-                        <span className={`${styles.tag} ${styles.tag_blue}`}>진행중</span>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
+          {/* 진행 중인 태스크만 (AI 피드백 박스 제거) */}
+          <div className={styles.card}>
+            <div className={styles.cardHeader}>
+              <span className={styles.cardTitle}>📋 진행 중인 태스크</span>
+              <button
+                className={styles.btnGhost}
+                style={{ fontSize: '12px', padding: '5px 12px' }}
+                onClick={() => projects.length > 0 && navigate(`/projects/${currentProjectUuid(projects)}/tasks`)}
+              >
+                전체 보기
+              </button>
             </div>
-
-            {/* AI 피드백 */}
-            <div className={styles.card}>
-              <div className={styles.cardHeader}>
-                <span className={styles.cardTitle}>🤖 AI 피드백</span>
-              </div>
-              <div className={styles.cardBody}>
+            <div className={styles.cardBody}>
+              {inProgressTasks.length === 0 ? (
                 <div className={styles.emptyState}>
-                  <span>🤖</span>
-                  <p>아직 AI 피드백이 없습니다</p>
-                  {projects.length > 0 && (
-                    <button
-                      className={styles.emptyBtn}
-                      onClick={() => navigate(`/projects/${currentProjectUuid(projects)}/risks`)}
-                    >
-                      AI 분석 시작하기
+                  <span>✅</span>
+                  <p>진행 중인 태스크가 없습니다</p>
+                  {projects.length > 0 ? (
+                    <button className={styles.emptyBtn} onClick={() => navigate(`/projects/${currentProjectUuid(projects)}/tasks`)}>
+                      태스크 보러가기
+                    </button>
+                  ) : (
+                    <button className={styles.emptyBtn} onClick={() => navigate('/projects/new')}>
+                      프로젝트 생성하기
                     </button>
                   )}
                 </div>
-              </div>
+              ) : (
+                inProgressTasks.slice(0, 4).map((task, i) => (
+                  <div key={i} className={styles.taskItem}
+                    onClick={() => navigate(`/projects/${task.projectId}/tasks`)}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <div className={`${styles.taskCheck} ${styles.activeCheck}`} />
+                    <div className={styles.taskInfo}>
+                      <div className={styles.taskName}>{task.title}</div>
+                      <div className={styles.taskMeta}>{task.projectName} · {task.dueDate}</div>
+                    </div>
+                    <div className={styles.taskRight}>
+                      <span className={`${styles.tag} ${styles.tag_blue}`}>진행중</span>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
-
           </div>
+
         </div>
       </main>
 
