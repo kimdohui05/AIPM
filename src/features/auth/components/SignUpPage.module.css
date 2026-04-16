@@ -1,0 +1,135 @@
+.container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background: linear-gradient(135deg, #F0F8FA 0%, #E0F4F8 100%);
+}
+.wrap { width: 100%; max-width: 480px; }
+.logo { text-align: center; margin-bottom: 28px; }
+.logoTitle { font-size: 24px; font-weight: 700; color: #0F2A31; letter-spacing: -0.5px; }
+.logoSub { font-size: 13px; color: #527880; margin-top: 4px; }
+
+.card {
+  background: #fff; border: 1px solid #D6EFF4;
+  border-radius: 18px; padding: 32px;
+  box-shadow: 0 4px 24px rgba(59,191,212,0.08);
+}
+.cardTitle { font-size: 16px; font-weight: 700; color: #0F2A31; margin-bottom: 20px; text-align: center;}
+
+/* 스텝 인디케이터 */
+.stepIndicator {
+  display: flex; align-items: center;
+  margin-bottom: 24px;
+}
+.step {
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  font-size: 11px; color: #9BBEC5; font-weight: 500;
+}
+.stepActive { color: #1E9CB5; font-weight: 700; }
+.stepCircle {
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 2px solid #D6EFF4;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; color: #9BBEC5; background: #fff;
+}
+.stepActive .stepCircle {
+  border-color: #3BBFD4; color: #3BBFD4;
+}
+.stepDone {
+  background: #3BBFD4 !important;
+  border-color: #3BBFD4 !important;
+  color: #fff !important;
+}
+.stepLine {
+  flex: 1; height: 2px; background: #D6EFF4; margin: 0 10px 16px;
+}
+.stepLineDone { background: #3BBFD4; }
+
+/* 폼 */
+.form { display: flex; flex-direction: column; gap: 14px; }
+.formGroup { display: flex; flex-direction: column; gap: 6px; }
+.formGroup label { font-size: 13px; font-weight: 600; color: #0F2A31; }
+.formGroup input {
+  padding: 10px 14px;
+  border: 1.5px solid #D6EFF4; border-radius: 10px;
+  font-size: 13.5px; font-family: inherit; color: #0F2A31;
+  background: #F7FCFD; outline: none;
+  transition: border-color 0.15s, background 0.15s;
+}
+.formGroup input:focus { border-color: #3BBFD4; background: #fff; }
+
+/* 이미지 업로드 */
+.imageUpload { display: flex; align-items: center; gap: 14px; }
+.imagePreview {
+  width: 64px; height: 64px; border-radius: 50%;
+  border: 2px solid #D6EFF4; background: #F7FCFD;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px; overflow: hidden; flex-shrink: 0;
+}
+.imagePreview img { width: 80%; height: 80%; object-fit: cover; }
+.imageBtn {
+  padding: 8px 16px; border-radius: 8px;
+  border: 1.5px solid #D6EFF4; background: #fff;
+  font-size: 12.5px; font-weight: 600; color: #527880;
+  cursor: pointer; transition: all 0.13s;
+}
+.imageBtn:hover { border-color: #3BBFD4; color: #1E9CB5; }
+
+/* 버튼 */
+.btnRow { display: flex; gap: 10px; margin-top: 4px; }
+.backBtn {
+  padding: 12px 18px; border-radius: 10px;
+  border: 1.5px solid #D6EFF4; background: #fff;
+  font-size: 13.5px; font-weight: 600; color: #527880;
+  cursor: pointer; font-family: inherit; transition: all 0.13s;
+}
+.backBtn:hover { border-color: #3BBFD4; color: #1E9CB5; }
+.submitBtn {
+  flex: 1; padding: 12px;
+  background: linear-gradient(135deg, #3BBFD4, #1E9CB5);
+  color: #fff; border: none; border-radius: 10px;
+  font-size: 14px; font-weight: 700; cursor: pointer;
+  font-family: inherit;
+  box-shadow: 0 3px 14px rgba(59,191,212,0.35);
+  transition: all 0.15s;
+}
+.submitBtn:hover { transform: translateY(-1px); box-shadow: 0 5px 20px rgba(59,191,212,0.45); }
+.submitBtn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.switchText { text-align: center; margin-top: 20px; font-size: 13px; color: #527880; }
+.switchText button {
+  background: none; border: none; color: #1E9CB5;
+  font-weight: 600; cursor: pointer; font-family: inherit; font-size: 13px;
+}
+.switchText button:hover { text-decoration: underline; }
+.inputError {
+  border-color: #F05A5A !important;
+  background: #FFF8F8 !important;
+}
+.errorMsg {
+  font-size: 11.5px;
+  color: #F05A5A;
+  margin-top: 4px;
+  display: block;
+}
+.serverError {
+  background: #FFF0F0;
+  border: 1px solid #F8C8C8;
+  border-radius: 9px;
+  padding: 11px 14px;
+  font-size: 13px;
+  color: #C94040;
+  margin-bottom: 16px;
+  line-height: 1.5;
+}
+.serverSuccess {
+  background: #F0FBF6;
+  border: 1px solid #B8EDD5;
+  border-radius: 9px;
+  padding: 11px 14px;
+  font-size: 13px;
+  color: #1A9964;
+  margin-bottom: 16px;
+}
