@@ -1,0 +1,116 @@
+.container { min-height: 100vh; background: #F0F8FA; display: flex; flex-direction: column; }
+
+.header {
+  background: #fff; border-bottom: 1px solid #D6EFF4;
+  padding: 0 28px; height: 64px;
+  display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
+}
+.headerLeft { display: flex; align-items: center; gap: 16px; }
+.backBtn {
+  background: none; border: none; color: #527880;
+  font-size: 12.5px; font-weight: 600; cursor: pointer;
+  font-family: inherit; transition: color 0.13s; white-space: nowrap;
+}
+.backBtn:hover { color: #0F2A31; }
+.headerTitle { font-size: 16px; font-weight: 700; color: #0F2A31; }
+.headerSub { font-size: 11.5px; color: #527880; margin-top: 1px; }
+
+.content {
+  flex: 1; padding: 24px 28px;
+  max-width: 760px; width: 100%; margin: 0 auto;
+  display: flex; flex-direction: column; gap: 20px;
+}
+
+/* 요약 */
+.summaryRow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.summaryCard {
+  background: #fff; border: 1px solid #D6EFF4; border-radius: 12px;
+  padding: 16px 18px; display: flex; align-items: center; gap: 14px;
+}
+.summaryIcon {
+  width: 38px; height: 38px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0;
+}
+.summaryLabel { font-size: 11.5px; color: #527880; margin-bottom: 3px; }
+.summaryValue { font-size: 22px; font-weight: 700; color: #0F2A31; }
+
+/* 연동 목록 */
+.integrationList { display: flex; flex-direction: column; gap: 14px; }
+.integrationCard {
+  background: #fff; border: 1.5px solid #D6EFF4;
+  border-radius: 14px; padding: 18px 20px;
+  transition: all 0.13s;
+}
+.integrationCard:hover { box-shadow: 0 2px 14px rgba(0,0,0,0.06); }
+.connected { border-color: #22C98A; background: #F5FDF9; }
+
+.integrationHeader { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+.integrationIcon {
+  width: 44px; height: 44px; border-radius: 11px;
+  background: #F0F8FA; border: 1px solid #D6EFF4;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0;
+}
+.integrationInfo { flex: 1; min-width: 0; }
+.integrationName { font-size: 14px; font-weight: 700; color: #0F2A31; margin-bottom: 3px; }
+.integrationDesc { font-size: 12.5px; color: #527880; line-height: 1.45; }
+.integrationStatus { flex-shrink: 0; }
+.statusOn { font-size: 12px; font-weight: 600; color: #22C98A; }
+.statusOff { font-size: 12px; font-weight: 600; color: #9BBEC5; }
+
+/* 입력 폼 */
+.inputWrap { margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px; }
+.inputWrap input {
+  width: 100%; padding: 10px 14px;
+  border: 1.5px solid #3BBFD4; border-radius: 10px;
+  font-size: 13px; font-family: inherit; color: #0F2A31;
+  background: #fff; outline: none;
+}
+.inputBtns { display: flex; gap: 8px; justify-content: flex-end; }
+.cancelBtn {
+  padding: 7px 16px; border-radius: 8px;
+  border: 1.5px solid #D6EFF4; background: #fff;
+  font-size: 12.5px; font-weight: 600; color: #527880;
+  cursor: pointer; font-family: inherit; transition: all 0.13s;
+}
+.cancelBtn:hover { border-color: #3BBFD4; color: #1E9CB5; }
+.saveBtn {
+  padding: 7px 16px; border-radius: 8px;
+  background: linear-gradient(135deg, #3BBFD4, #1E9CB5);
+  color: #fff; border: none; font-size: 12.5px; font-weight: 600;
+  cursor: pointer; font-family: inherit; transition: all 0.13s;
+}
+.saveBtn:hover { transform: translateY(-1px); }
+
+/* 연동된 값 */
+.connectedValue {
+  background: #E0FAF0; border-radius: 8px;
+  padding: 8px 12px; margin-bottom: 12px;
+  font-size: 12px; color: #1A9964;
+  word-break: break-all;
+}
+
+/* 푸터 버튼 */
+.integrationFooter { display: flex; gap: 8px; justify-content: flex-end; }
+.connectBtn {
+  padding: 8px 18px; border-radius: 9px;
+  background: linear-gradient(135deg, #3BBFD4, #1E9CB5);
+  color: #fff; border: none; font-size: 12.5px; font-weight: 600;
+  cursor: pointer; font-family: inherit;
+  box-shadow: 0 2px 10px rgba(59,191,212,0.3); transition: all 0.13s;
+}
+.connectBtn:hover { transform: translateY(-1px); }
+.editBtn {
+  padding: 7px 14px; border-radius: 8px;
+  border: 1.5px solid #D6EFF4; background: #fff;
+  font-size: 12px; font-weight: 600; color: #527880;
+  cursor: pointer; font-family: inherit; transition: all 0.13s;
+}
+.editBtn:hover { border-color: #3BBFD4; color: #1E9CB5; }
+.disconnectBtn {
+  padding: 7px 14px; border-radius: 8px;
+  border: 1.5px solid #F8C8C8; background: #FFF8F8;
+  font-size: 12px; font-weight: 600; color: #F05A5A;
+  cursor: pointer; font-family: inherit; transition: all 0.13s;
+}
+.disconnectBtn:hover { background: #FEECEC; }
