@@ -47,6 +47,13 @@ public class ProjectEntity {
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
+    public void update(String name, String description, LocalDate startDate, LocalDate endDate) {
+        if (name != null) this.name = name;
+        if (description != null) this.description = description;
+        if (startDate != null) this.startDate = startDate;
+        if (endDate != null) this.endDate = endDate;
+    }
+
     public enum ProjectStatus {
         IN_PROGRESS, COMPLETED, ON_HOLD
     }

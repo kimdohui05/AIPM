@@ -50,6 +50,10 @@ public class TaskEntity {
 
     private LocalDate dueDate;
 
+    private String assigneeName;
+
+    private Integer progress;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private CreatedBy createdBy;
@@ -57,6 +61,24 @@ public class TaskEntity {
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;
+
+    public void update(String title, String description, String assigneeName,
+                       TaskPriority priority, LocalDate dueDate, TaskStatus status, Integer progress) {
+        this.title = title;
+        this.description = description;
+        this.assigneeName = assigneeName;
+        this.priority = priority;
+        this.dueDate = dueDate;
+        this.status = status;
+        this.progress = progress;
+    }
+
+    public void update(TaskStatus status, TaskPriority priority, LocalDate dueDate, String description) {
+        if (status != null) this.status = status;
+        if (priority != null) this.priority = priority;
+        if (dueDate != null) this.dueDate = dueDate;
+        if (description != null) this.description = description;
+    }
 
     public enum TaskStatus {
         PLANNED, IN_PROGRESS, COMPLETED

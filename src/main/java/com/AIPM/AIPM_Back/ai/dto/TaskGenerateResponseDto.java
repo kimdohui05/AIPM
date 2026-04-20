@@ -17,6 +17,7 @@ public class TaskGenerateResponseDto {
         private String title;
         private String description;
         private String assignee;
+        private String assigneeUuid;
         private String priority;
         private String dueDate;
     }
