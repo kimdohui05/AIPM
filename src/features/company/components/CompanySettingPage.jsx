@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import Sidebar from '../../../components/layout/Sidebar'
 import styles from './CompanySettingPage.module.css'
 
 const INITIAL_POSITIONS = ['사원', '주임', '대리', '과장', '차장', '부장', '이사', '대표']
@@ -13,6 +14,8 @@ export default function CompanySettingPage() {
   const [newPosition, setNewPosition] = useState('')
   const [newDepartment, setNewDepartment] = useState('')
   const [saving, setSaving] = useState(false)
+  const [showProfile, setShowProfile] = useState(false)
+  const nickname = localStorage.getItem('nickname') || '사용자'
 
   const addPosition = () => {
     const val = newPosition.trim()
@@ -41,106 +44,102 @@ export default function CompanySettingPage() {
   }
 
   return (
-    <div className={styles.container}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: '#F0F8FA' }}>
+      <Sidebar onProfileClick={() => setShowProfile(true)} />
+      <div className={styles.container}>
 
-      {/* 6. 헤더 - 로고 눌러서 돌아가기 */}
-      <header className={styles.header}>
-        <div className={styles.headerLeft}>
-          <div
-            onClick={() => navigate('/dashboard')}
-            style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}
-          >
-            <div style={{
-              width: '28px', height: '28px', borderRadius: '7px',
-              background: 'linear-gradient(135deg, #3BBFD4, #1E9CB5)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px'
-            }}>🤖</div>
-            <span style={{ fontSize: '15px', fontWeight: 700, color: '#0F2A31' }}>AI PM</span>
-            <span style={{ fontSize: '9px', fontWeight: 600, background: '#3BBFD4', color: '#fff', padding: '2px 6px', borderRadius: '4px' }}>BETA</span>
-          </div>
-          <div>
-            <h1 className={styles.headerTitle}>회사 설정</h1>
-            <p className={styles.headerSub}>회사 정보 및 직급 체계를 설정합니다</p>
-          </div>
-        </div>
-        <button className={styles.btnPrimary} onClick={handleSave} disabled={saving}>
-          {saving ? '저장 중...' : '💾 저장'}
-        </button>
-      </header>
-
-      <div className={styles.content}>
-
-        <div className={styles.card}>
-          <div className={styles.cardHeader}>
-            <span className={styles.cardTitle}>🏢 회사 기본 정보</span>
-          </div>
-          <div className={styles.cardBody}>
-            <div className={styles.formGroup}>
-              <label>회사명</label>
-              <input
-                type="text"
-                value={companyName}
-                onChange={e => setCompanyName(e.target.value)}
-                placeholder="회사명을 입력하세요"
-              />
+        <header className={styles.header}>
+          <div className={styles.headerLeft}>
+            <div>
+              <h1 className={styles.headerTitle}>회사 설정</h1>
+              <p className={styles.headerSub}>회사 정보 및 직급 체계를 설정합니다</p>
             </div>
           </div>
-        </div>
+          <button className={styles.btnPrimary} onClick={handleSave} disabled={saving}>
+            {saving ? '저장 중...' : '💾 저장'}
+          </button>
+        </header>
 
-        <div className={styles.card}>
-          <div className={styles.cardHeader}>
-            <span className={styles.cardTitle}>🏅 직급 체계</span>
-            <span className={styles.countBadge}>{positions.length}개</span>
-          </div>
-          <div className={styles.cardBody}>
-            <div className={styles.inputRow}>
-              <input
-                type="text"
-                value={newPosition}
-                onChange={e => setNewPosition(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && addPosition()}
-                placeholder="새 직급 입력"
-              />
-              <button className={styles.addBtn} onClick={addPosition}>+ 추가</button>
+        <div className={styles.content}>
+          <div className={styles.card}>
+            <div className={styles.cardHeader}>
+              <span className={styles.cardTitle}>🏢 회사 기본 정보</span>
             </div>
-            <div className={styles.tagList}>
-              {positions.map((p, i) => (
-                <div key={i} className={styles.tagItem}>
-                  <span>{p}</span>
-                  <button onClick={() => removePosition(p)}>✕</button>
-                </div>
-              ))}
+            <div className={styles.cardBody}>
+              <div className={styles.formGroup}>
+                <label>회사명</label>
+                <input type="text" value={companyName} onChange={e => setCompanyName(e.target.value)} placeholder="회사명을 입력하세요" />
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className={styles.card}>
-          <div className={styles.cardHeader}>
-            <span className={styles.cardTitle}>🏗️ 부서 관리</span>
-            <span className={styles.countBadge}>{departments.length}개</span>
-          </div>
-          <div className={styles.cardBody}>
-            <div className={styles.inputRow}>
-              <input
-                type="text"
-                value={newDepartment}
-                onChange={e => setNewDepartment(e.target.value)}
-                onKeyDown={e => e.key === 'Enter' && addDepartment()}
-                placeholder="새 부서 입력"
-              />
-              <button className={styles.addBtn} onClick={addDepartment}>+ 추가</button>
+          <div className={styles.card}>
+            <div className={styles.cardHeader}>
+              <span className={styles.cardTitle}>🏅 직급 체계</span>
+              <span className={styles.countBadge}>{positions.length}개</span>
             </div>
-            <div className={styles.tagList}>
-              {departments.map((d, i) => (
-                <div key={i} className={styles.tagItem}>
-                  <span>{d}</span>
-                  <button onClick={() => removeDepartment(d)}>✕</button>
-                </div>
-              ))}
+            <div className={styles.cardBody}>
+              <div className={styles.inputRow}>
+                <input type="text" value={newPosition} onChange={e => setNewPosition(e.target.value)} onKeyDown={e => e.key === 'Enter' && addPosition()} placeholder="새 직급 입력" />
+                <button className={styles.addBtn} onClick={addPosition}>+ 추가</button>
+              </div>
+              <div className={styles.tagList}>
+                {positions.map((p, i) => (
+                  <div key={i} className={styles.tagItem}>
+                    <span>{p}</span>
+                    <button onClick={() => removePosition(p)}>✕</button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.card}>
+            <div className={styles.cardHeader}>
+              <span className={styles.cardTitle}>🏗️ 부서 관리</span>
+              <span className={styles.countBadge}>{departments.length}개</span>
+            </div>
+            <div className={styles.cardBody}>
+              <div className={styles.inputRow}>
+                <input type="text" value={newDepartment} onChange={e => setNewDepartment(e.target.value)} onKeyDown={e => e.key === 'Enter' && addDepartment()} placeholder="새 부서 입력" />
+                <button className={styles.addBtn} onClick={addDepartment}>+ 추가</button>
+              </div>
+              <div className={styles.tagList}>
+                {departments.map((d, i) => (
+                  <div key={i} className={styles.tagItem}>
+                    <span>{d}</span>
+                    <button onClick={() => removeDepartment(d)}>✕</button>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
       </div>
+
+      {showProfile && (
+        <div className={styles.panelOverlay} onClick={() => setShowProfile(false)}>
+          <div className={styles.panel} onClick={e => e.stopPropagation()}>
+            <div className={styles.panelHeader}>
+              <h2 className={styles.panelTitle}>내 정보</h2>
+              <button className={styles.panelClose} onClick={() => setShowProfile(false)}>✕</button>
+            </div>
+            <div className={styles.panelBody}>
+              <div className={styles.panelAvatar}>{nickname.charAt(0)}</div>
+              <div className={styles.panelNickname}>{nickname}</div>
+              <div className={styles.panelInfo}>
+                <div className={styles.panelInfoItem}><span className={styles.panelInfoLabel}>닉네임</span><span className={styles.panelInfoValue}>{nickname}</span></div>
+                <div className={styles.panelInfoItem}><span className={styles.panelInfoLabel}>소속 회사</span><span className={styles.panelInfoValue}>-</span></div>
+                <div className={styles.panelInfoItem}><span className={styles.panelInfoLabel}>직급</span><span className={styles.panelInfoValue}>-</span></div>
+                <div className={styles.panelInfoItem}><span className={styles.panelInfoLabel}>부서</span><span className={styles.panelInfoValue}>-</span></div>
+              </div>
+              <button className={styles.panelEditBtn} onClick={() => { setShowProfile(false); navigate('/profile') }}>
+                ✏️ 프로필 수정하기
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

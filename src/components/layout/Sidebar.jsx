@@ -6,11 +6,11 @@ export default function Sidebar({ onProfileClick }) {
   const nickname = localStorage.getItem('nickname') || '사용자'
 
   const goTo = (path) => {
-    const projects = JSON.parse(localStorage.getItem('projects') || '[]')
-    if (projects.length > 0) {
-      navigate(path.replace(':id', projects[0].id))
+    const stored = localStorage.getItem('currentProjectUuid')
+    if (stored) {
+      navigate(path.replace(':id', stored))
     } else {
-      navigate('/projects/new')
+      navigate('/dashboard')
     }
   }
 

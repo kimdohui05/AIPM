@@ -178,7 +178,6 @@ export default function TaskBoardPage() {
 
         <header className={styles.header}>
           <div className={styles.headerLeft}>
-            <button className={styles.backBtn} onClick={() => navigate('/dashboard')}>←</button>
             <div>
               <h1 className={styles.headerTitle}>{project?.name || '태스크 보드'}</h1>
               <p className={styles.headerSub}>

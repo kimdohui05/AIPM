@@ -1,4 +1,7 @@
-.container { min-height: 100vh; background: #F0F8FA; display: flex; flex-direction: column; }
+.container {
+  flex: 1; min-width: 0; min-height: 100vh;
+  background: #F0F8FA; display: flex; flex-direction: column;
+}
 
 .header {
   background: #fff; border-bottom: 1px solid #D6EFF4;
@@ -6,12 +9,6 @@
   display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
 }
 .headerLeft { display: flex; align-items: center; gap: 16px; }
-.backBtn {
-  background: none; border: none; color: #527880;
-  font-size: 12.5px; font-weight: 600; cursor: pointer;
-  font-family: inherit; transition: color 0.13s; white-space: nowrap;
-}
-.backBtn:hover { color: #0F2A31; }
 .headerTitle { font-size: 16px; font-weight: 700; color: #0F2A31; }
 .headerSub { font-size: 11.5px; color: #527880; margin-top: 1px; }
 .btnPrimary {
@@ -36,11 +33,7 @@
   display: flex; align-items: center; justify-content: space-between;
 }
 .cardTitle { font-size: 14px; font-weight: 700; color: #0F2A31; }
-.countBadge {
-  font-size: 11px; font-weight: 600;
-  background: #E0F7FB; color: #1E9CB5;
-  padding: 2px 9px; border-radius: 10px;
-}
+.countBadge { font-size: 11px; font-weight: 600; background: #E0F7FB; color: #1E9CB5; padding: 2px 9px; border-radius: 10px; }
 .cardBody { padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; }
 
 .formGroup { display: flex; flex-direction: column; gap: 6px; }
@@ -48,8 +41,7 @@
 .formGroup input {
   padding: 10px 14px; border: 1.5px solid #D6EFF4; border-radius: 10px;
   font-size: 13.5px; font-family: inherit; color: #0F2A31;
-  background: #F7FCFD; outline: none;
-  transition: border-color 0.15s, background 0.15s;
+  background: #F7FCFD; outline: none; transition: border-color 0.15s, background 0.15s;
 }
 .formGroup input:focus { border-color: #3BBFD4; background: #fff; }
 
@@ -57,8 +49,7 @@
 .inputRow input {
   flex: 1; padding: 10px 14px; border: 1.5px solid #D6EFF4; border-radius: 10px;
   font-size: 13.5px; font-family: inherit; color: #0F2A31;
-  background: #F7FCFD; outline: none;
-  transition: border-color 0.15s;
+  background: #F7FCFD; outline: none; transition: border-color 0.15s;
 }
 .inputRow input:focus { border-color: #3BBFD4; background: #fff; }
 .addBtn {
@@ -73,13 +64,26 @@
 .tagItem {
   display: inline-flex; align-items: center; gap: 7px;
   background: #F0F8FA; border: 1px solid #D6EFF4;
-  border-radius: 20px; padding: 6px 12px 6px 14px;
-  transition: all 0.13s;
+  border-radius: 20px; padding: 6px 12px 6px 14px; transition: all 0.13s;
 }
 .tagItem:hover { border-color: #3BBFD4; }
 .tagItem span { font-size: 13px; font-weight: 500; color: #0F2A31; }
-.tagItem button {
-  background: none; border: none; cursor: pointer;
-  color: #9BBEC5; font-size: 11px; padding: 0; transition: color 0.13s;
-}
+.tagItem button { background: none; border: none; cursor: pointer; color: #9BBEC5; font-size: 11px; padding: 0; transition: color 0.13s; }
 .tagItem button:hover { color: #F05A5A; }
+
+.panelOverlay { position: fixed; inset: 0; background: rgba(15,42,49,0.3); z-index: 200; }
+.panel { position: fixed; right: 0; top: 0; bottom: 0; width: 300px; background: #fff; box-shadow: -4px 0 24px rgba(15,42,49,0.12); display: flex; flex-direction: column; animation: slideIn 0.2s ease; }
+@keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+.panelHeader { display: flex; align-items: center; justify-content: space-between; padding: 20px 22px; border-bottom: 1px solid #D6EFF4; }
+.panelTitle { font-size: 15px; font-weight: 700; color: #0F2A31; }
+.panelClose { background: none; border: none; font-size: 16px; color: #9BBEC5; cursor: pointer; }
+.panelClose:hover { color: #0F2A31; }
+.panelBody { flex: 1; padding: 24px 22px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.panelAvatar { width: 72px; height: 72px; border-radius: 50%; background: linear-gradient(135deg, #3BBFD4, #1E9CB5); display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+.panelNickname { font-size: 17px; font-weight: 700; color: #0F2A31; margin-bottom: 8px; }
+.panelInfo { width: 100%; display: flex; flex-direction: column; gap: 0; margin-bottom: 20px; }
+.panelInfoItem { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #D6EFF4; }
+.panelInfoItem:last-child { border-bottom: none; }
+.panelInfoLabel { font-size: 12.5px; color: #527880; font-weight: 500; }
+.panelInfoValue { font-size: 13px; color: #0F2A31; font-weight: 600; }
+.panelEditBtn { width: 100%; padding: 12px; background: linear-gradient(135deg, #3BBFD4, #1E9CB5); color: #fff; border: none; border-radius: 10px; font-size: 13.5px; font-weight: 700; cursor: pointer; font-family: inherit; }

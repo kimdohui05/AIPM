@@ -149,7 +149,6 @@ export default function RiskPage() {
 
         <header className={styles.header}>
           <div className={styles.headerLeft}>
-            <button className={styles.backBtn} onClick={() => navigate('/dashboard')}>←</button>
             <div>
               <h1 className={styles.headerTitle}>리스크 감지</h1>
               <p className={styles.headerSub}>
@@ -261,7 +260,7 @@ export default function RiskPage() {
                 <div className={styles.panelInfoItem}><span className={styles.panelInfoLabel}>부서</span><span className={styles.panelInfoValue}>-</span></div>
               </div>
               <button className={styles.panelEditBtn} onClick={() => { setShowProfile(false); navigate('/profile') }}>
-                ✏️ 프로필 수정하기 1
+                ✏️ 프로필 수정하기
               </button>
             </div>
           </div>

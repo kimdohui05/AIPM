@@ -65,7 +65,6 @@ export default function ReportPage() {
 
         <header className={styles.header}>
           <div className={styles.headerLeft}>
-            <button className={styles.backBtn} onClick={() => navigate('/dashboard')}>←</button>
             <div>
               <h1 className={styles.headerTitle}>보고서</h1>
               <p className={styles.headerSub}>AI가 프로젝트 현황을 자동으로 분석합니다</p>
