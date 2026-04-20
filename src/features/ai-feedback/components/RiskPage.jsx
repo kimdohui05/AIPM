@@ -261,7 +261,7 @@ export default function RiskPage() {
                 <div className={styles.panelInfoItem}><span className={styles.panelInfoLabel}>부서</span><span className={styles.panelInfoValue}>-</span></div>
               </div>
               <button className={styles.panelEditBtn} onClick={() => { setShowProfile(false); navigate('/profile') }}>
-                ✏️ 프로필 수정하기
+                ✏️ 프로필 수정하기 1
               </button>
             </div>
           </div>
