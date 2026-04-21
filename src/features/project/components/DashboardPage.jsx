@@ -21,13 +21,11 @@ export default function DashboardPage() {
   const currentProjectUuid = (projectList) => {
     const stored = localStorage.getItem('currentProjectUuid')
     if (stored && projectList.some(p => p.uuid === stored)) return stored
-    return projectList.length > 0 ? projectList[projectList.length - 1].uuid : null
+    return projectList.length > 0 ? projectList[0].uuid : null
   }
 
   useEffect(() => {
-    if (location.state?.openProfile) {
-      setShowProfile(true)
-    }
+    if (location.state?.openProfile) setShowProfile(true)
   }, [location.state])
 
   useEffect(() => {
@@ -36,28 +34,45 @@ export default function DashboardPage() {
       .catch(() => {})
   }, [])
 
-  useEffect(() => {
-    client.get('/api/project')
-      .then(async res => {
-        const loadedProjects = res.data || []
-        setProjects(loadedProjects)
+  const loadProjects = async () => {
+    try {
+      const res = await client.get('/api/project')
+      // 최신 생성순(위로)
+      const loadedProjects = [...(res.data || [])].reverse()
+      setProjects(loadedProjects)
 
-        const taskArrays = await Promise.all(
-          loadedProjects.map(p =>
-            client.get(`/api/task/project/${p.uuid}`)
-              .then(r => (r.data || []).map(t => ({
-                ...t,
-                status: toFrontStatus(t.status),
-                projectName: p.name,
-                projectId: p.uuid,
-              })))
-              .catch(() => [])
-          )
+      const taskArrays = await Promise.all(
+        loadedProjects.map(p =>
+          client.get(`/api/task/project/${p.uuid}`)
+            .then(r => (r.data || []).map(t => ({
+              ...t,
+              status: toFrontStatus(t.status),
+              projectName: p.name,
+              projectId: p.uuid,
+            })))
+            .catch(() => [])
         )
-        setAllTasks(taskArrays.flat())
-      })
-      .catch(() => {})
+      )
+      setAllTasks(taskArrays.flat())
+    } catch {}
+  }
+
+  useEffect(() => {
+    loadProjects()
   }, [])
+
+  const handleDeleteProject = async (e, uuid) => {
+    e.stopPropagation()
+    if (!window.confirm('프로젝트를 삭제할까요? 복구할 수 없습니다.')) return
+    try {
+      await client.delete(`/api/project/${uuid}`)
+      setProjects(prev => prev.filter(p => p.uuid !== uuid))
+      setAllTasks(prev => prev.filter(t => t.projectId !== uuid))
+    } catch (err) {
+      const msg = err?.response?.data?.message || err?.message || String(err)
+      alert(`삭제 실패: ${msg}`)
+    }
+  }
 
   const inProgressTasks = allTasks.filter(t => t.status === 'in-progress')
   const doneTasks = allTasks.filter(t => t.status === 'done')
@@ -65,7 +80,6 @@ export default function DashboardPage() {
   return (
     <div className={styles.app}>
 
-      {/* 사이드바 */}
       <aside className={styles.sidebar}>
         <div className={styles.logo} onClick={() => navigate('/dashboard')} style={{ cursor: 'pointer' }}>
           <div className={styles.logoIcon}>🤖</div>
@@ -101,7 +115,6 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* 1. 내 정보 보기 아래로 내림 */}
         <div className={styles.sidebarBottom}>
           <div className={styles.userInfo} onClick={() => setShowProfile(true)}>
             <div className={styles.userAvatar}>{nickname.charAt(0)}</div>
@@ -113,7 +126,6 @@ export default function DashboardPage() {
         </div>
       </aside>
 
-      {/* 메인 */}
       <main className={styles.main}>
         <header className={styles.header}>
           <div>
@@ -122,7 +134,6 @@ export default function DashboardPage() {
               {new Date().toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' })}
             </div>
           </div>
-          {/* 2. 새 프로젝트 버튼 제거 */}
           <div className={styles.headerRight}>
             <button className={styles.btnGhost}>🔔 알림</button>
           </div>
@@ -130,7 +141,6 @@ export default function DashboardPage() {
 
         <div className={styles.content}>
 
-          {/* 통계 카드 */}
           <div className={styles.statsRow}>
             <div className={styles.statCard}>
               <div>
@@ -166,7 +176,6 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* 프로젝트 목록 */}
           {projects.length > 0 && (
             <div className={styles.card}>
               <div className={styles.cardHeader}>
@@ -187,7 +196,7 @@ export default function DashboardPage() {
                     onClick={() => navigate(`/projects/${p.uuid}/tasks`)}
                     style={{ cursor: 'pointer' }}
                   >
-                    <div className={styles.projectColor} style={{ background: ['#3BBFD4','#22C98A','#F5BC3D','#F05A5A'][i % 4], width: '10px', height: '10px', borderRadius: '50%', flexShrink: 0 }} />
+                    <div style={{ background: ['#3BBFD4','#22C98A','#F5BC3D','#F05A5A'][i % 4], width: '10px', height: '10px', borderRadius: '50%', flexShrink: 0 }} />
                     <div className={styles.taskInfo}>
                       <div className={styles.taskName}>{p.name}</div>
                       <div className={styles.taskMeta}>마감 {p.endDate || '-'}</div>
@@ -195,13 +204,25 @@ export default function DashboardPage() {
                     <span style={{ fontSize: '11px', padding: '3px 9px', borderRadius: '6px', background: '#E0F7FB', color: '#1E9CB5', fontWeight: 600 }}>
                       진행중
                     </span>
+                    <button
+                      onClick={(e) => handleDeleteProject(e, p.uuid)}
+                      style={{
+                        background: '#FEECEC', border: 'none', cursor: 'pointer',
+                        color: '#F05A5A', fontSize: '11px', fontWeight: 600,
+                        padding: '3px 9px', borderRadius: '6px',
+                        fontFamily: 'inherit', flexShrink: 0, transition: 'opacity 0.12s'
+                      }}
+                      onMouseEnter={e => e.currentTarget.style.opacity = '0.7'}
+                      onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+                    >
+                      삭제
+                    </button>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* 진행 중인 태스크만 (AI 피드백 박스 제거) */}
           <div className={styles.card}>
             <div className={styles.cardHeader}>
               <span className={styles.cardTitle}>📋 진행 중인 태스크</span>
@@ -251,7 +272,6 @@ export default function DashboardPage() {
         </div>
       </main>
 
-      {/* 내 정보 사이드 패널 */}
       {showProfile && (
         <div className={styles.panelOverlay} onClick={() => setShowProfile(false)}>
           <div className={styles.panel} onClick={e => e.stopPropagation()}>
@@ -280,19 +300,13 @@ export default function DashboardPage() {
                   <span className={styles.panelInfoValue}>{profile?.departmentId || '-'}</span>
                 </div>
               </div>
-              <button
-                className={styles.panelEditBtn}
-                onClick={() => { setShowProfile(false); navigate('/profile') }}
-              >
+              <button className={styles.panelEditBtn} onClick={() => { setShowProfile(false); navigate('/profile') }}>
                 ✏️ 프로필 수정하기
               </button>
               <button
                 className={styles.panelEditBtn}
                 style={{ marginTop: '8px', background: 'transparent', color: '#ef4444', border: '1px solid #ef4444' }}
-                onClick={() => {
-                  localStorage.clear()
-                  navigate('/login')
-                }}
+                onClick={() => { localStorage.clear(); navigate('/login') }}
               >
                 로그아웃
               </button>
