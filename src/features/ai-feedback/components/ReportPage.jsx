@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import Sidebar from '../../../components/layout/Sidebar'
-import { getReports, saveReports } from '../../../store/projectStore'
+import client from '../../../api/client'
 import styles from './ReportPage.module.css'
+
+const STORAGE_KEY = (id) => `reports_api_${id}`
 
 export default function ReportPage() {
   const navigate = useNavigate()
@@ -10,29 +12,39 @@ export default function ReportPage() {
   const [reports, setReports] = useState([])
   const [selected, setSelected] = useState(null)
   const [generating, setGenerating] = useState(false)
-  const [projectId, setProjectId] = useState(null)
+  const [project, setProject] = useState(null)
   const [showProfile, setShowProfile] = useState(false)
   const nickname = localStorage.getItem('nickname') || '사용자'
 
   useEffect(() => {
-    const pid = id || JSON.parse(localStorage.getItem('projects') || '[]')[0]?.id
-    if (pid) {
-      setProjectId(pid)
-      const saved = getReports(pid)
-      setReports(saved)
-      if (saved.length > 0) setSelected(saved[0])
+    if (!id) return
+    // localStorage에서 먼저 불러오기 (새로고침 유지)
+    const saved = localStorage.getItem(STORAGE_KEY(id))
+    if (saved) {
+      const parsed = JSON.parse(saved)
+      setReports(parsed)
+      if (parsed.length > 0) setSelected(parsed[0])
     }
+
+    client.get(`/api/project/${id}`)
+      .then(res => setProject(res.data))
+      .catch(() => {})
   }, [id])
 
-  const handleGenerate = () => {
+  const saveReports = (updated) => {
+    localStorage.setItem(STORAGE_KEY(id), JSON.stringify(updated))
+    setReports(updated)
+  }
+
+  const handleGenerate = async () => {
     setGenerating(true)
-    setTimeout(() => {
-      const projects = JSON.parse(localStorage.getItem('projects') || '[]')
-      const project = projects.find(p => String(p.id) === String(projectId)) || projects[0]
-      const tasks = JSON.parse(localStorage.getItem(`tasks_${projectId}`) || '[]')
-      const doneTasks = tasks.filter(t => t.status === 'done')
-      const inProgressTasks = tasks.filter(t => t.status === 'in-progress')
-      const todoTasks = tasks.filter(t => t.status === 'todo')
+    try {
+      const taskRes = await client.get(`/api/task/project/${id}`)
+      const tasks = taskRes.data || []
+
+      const doneTasks = tasks.filter(t => t.status === 'COMPLETED')
+      const inProgressTasks = tasks.filter(t => t.status === 'IN_PROGRESS')
+      const todoTasks = tasks.filter(t => t.status === 'PLANNED')
       const totalPct = tasks.length > 0 ? Math.round((doneTasks.length / tasks.length) * 100) : 0
 
       const newReport = {
@@ -47,15 +59,19 @@ export default function ReportPage() {
           { title: '✅ 주요 성과', content: doneTasks.length > 0 ? `완료된 태스크: ${doneTasks.map(t => t.title).join(', ')}` : '아직 완료된 태스크가 없습니다.' },
           { title: '⚠️ 이슈 및 리스크', content: `현재 ${inProgressTasks.length}개 태스크가 진행 중입니다. 지속적인 모니터링이 필요합니다.` },
           { title: '📅 다음 주 계획', content: todoTasks.length > 0 ? `예정된 태스크: ${todoTasks.map(t => t.title).join(', ')}` : '모든 태스크가 진행 중이거나 완료되었습니다.' },
-          { title: '👥 팀 현황', content: project?.members?.length > 0 ? `총 ${project.members.length}명의 팀원이 협업 중입니다. (${project.members.join(', ')})` : '팀원 정보가 없습니다.' },
+          { title: '👥 팀 현황', content: project?.members?.length > 0 ? `총 ${project.members.length}명의 팀원이 협업 중입니다.` : '팀원 정보가 없습니다.' },
         ]
       }
+
       const updated = [newReport, ...reports]
-      saveReports(projectId, updated)
-      setReports(updated)
+      saveReports(updated)
       setSelected(newReport)
+    } catch (err) {
+      const msg = err?.response?.data?.message || err?.message || String(err)
+      alert(`보고서 생성 실패: ${msg}`)
+    } finally {
       setGenerating(false)
-    }, 2000)
+    }
   }
 
   return (

@@ -2,10 +2,8 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import Sidebar from '../../../components/layout/Sidebar'
 import client from '../../../api/client'
-import { getRisks, saveRisks } from '../../../store/projectStore'
 import styles from './RiskPage.module.css'
 
-// 백엔드 타입 → 프론트 타입 매핑
 const TYPE_MAP = {
   DEADLINE: 'schedule',
   OVERLOAD: 'resource',
@@ -26,6 +24,8 @@ const getRec = (type) => {
   }
 }
 
+const STORAGE_KEY = (id) => `risks_api_${id}`
+
 export default function RiskPage() {
   const navigate = useNavigate()
   const { id } = useParams()
@@ -37,13 +37,20 @@ export default function RiskPage() {
   const nickname = localStorage.getItem('nickname') || '사용자'
 
   useEffect(() => {
-    if (id) {
-      setRisks(getRisks(id))
-      client.get(`/api/project/${id}`)
-        .then(res => setProject(res.data))
-        .catch(() => {})
-    }
+    if (!id) return
+    // localStorage에서 먼저 불러오기 (새로고침 유지)
+    const saved = localStorage.getItem(STORAGE_KEY(id))
+    if (saved) setRisks(JSON.parse(saved))
+
+    client.get(`/api/project/${id}`)
+      .then(res => setProject(res.data))
+      .catch(() => {})
   }, [id])
+
+  const saveRisks = (updated) => {
+    localStorage.setItem(STORAGE_KEY(id), JSON.stringify(updated))
+    setRisks(updated)
+  }
 
   const filtered = risks.filter(r => {
     if (filter === 'active') return !r.resolved
@@ -53,14 +60,12 @@ export default function RiskPage() {
 
   const toggleResolve = (riskId) => {
     const updated = risks.map(r => r.id === riskId ? { ...r, resolved: !r.resolved } : r)
-    saveRisks(id, updated)
-    setRisks(updated)
+    saveRisks(updated)
   }
 
   const handleAnalyze = async () => {
     setAnalyzing(true)
     try {
-      // 1. 태스크 로드
       const taskRes = await client.get(`/api/task/project/${id}`)
       const tasks = taskRes.data || []
 
@@ -69,24 +74,15 @@ export default function RiskPage() {
         return
       }
 
-      // 2. 유저 프로필 로드
       let profile = null
       try {
         const profileRes = await client.get('/api/user/profile')
         profile = profileRes.data
       } catch {}
 
-      // 3. 멤버 목록 구성 (현재 유저 + 태스크 담당자들)
       const members = []
       const myName = profile?.nickname || localStorage.getItem('nickname') || '나'
-
-      members.push({
-        name: myName,
-        position: profile?.position || '팀원',
-        techStack: '',
-        yearsOfExperience: null,
-        portfolio: profile?.portfolio || '',
-      })
+      members.push({ name: myName, position: profile?.position || '팀원', techStack: '', yearsOfExperience: null, portfolio: profile?.portfolio || '' })
 
       const assigneeNames = [...new Set(tasks.map(t => t.assigneeName).filter(Boolean))]
       assigneeNames.forEach(name => {
@@ -95,7 +91,6 @@ export default function RiskPage() {
         }
       })
 
-      // 4. AI PM 분석 요청 (태스크 status/priority는 이미 백엔드 포맷)
       const res = await client.post('/api/ai/pm-analysis', {
         projectName: project?.name || '프로젝트',
         startDate: project?.startDate || new Date().toISOString().slice(0, 10),
@@ -112,7 +107,6 @@ export default function RiskPage() {
         })),
       })
 
-      // 5. riskWarnings → 리스크 카드 변환
       const newRisks = (res.data.riskWarnings || []).map((w, i) => ({
         id: Date.now() + i,
         type: TYPE_MAP[w.type] || 'technical',
@@ -125,10 +119,8 @@ export default function RiskPage() {
         resolved: false,
       }))
 
-      // 기존 해결된 리스크는 유지, 미해결은 새 분석 결과로 교체
       const updated = [...newRisks, ...risks.filter(r => r.resolved)]
-      saveRisks(id, updated)
-      setRisks(updated)
+      saveRisks(updated)
     } catch (err) {
       const msg = err?.response?.data?.message || err?.response?.data || err?.message || String(err)
       alert(`분석 실패: ${msg}`)
@@ -203,10 +195,7 @@ export default function RiskPage() {
           ) : (
             <div className={styles.riskList}>
               {filtered.map(risk => (
-                <div
-                  key={risk.id}
-                  className={`${styles.riskCard} ${styles['severity_' + risk.severity]} ${risk.resolved ? styles.resolved : ''}`}
-                >
+                <div key={risk.id} className={`${styles.riskCard} ${styles['severity_' + risk.severity]} ${risk.resolved ? styles.resolved : ''}`}>
                   <div className={styles.riskCardHeader}>
                     <span className={styles.riskTypeIcon}>{TYPE_ICON[risk.type] || '⚠️'}</span>
                     <div className={styles.riskTitleWrap}>
@@ -218,9 +207,7 @@ export default function RiskPage() {
                     </div>
                     <div className={styles.riskBadges}>
                       <span className={styles.typeBadge}>{TYPE_LABEL[risk.type] || risk.type}</span>
-                      <span className={`${styles.severityBadge} ${styles['sev_' + risk.severity]}`}>
-                        {SEVERITY_LABEL[risk.severity] || risk.severity}
-                      </span>
+                      <span className={`${styles.severityBadge} ${styles['sev_' + risk.severity]}`}>{SEVERITY_LABEL[risk.severity] || risk.severity}</span>
                     </div>
                   </div>
                   {risk.desc && <p className={styles.riskDesc}>{risk.desc}</p>}
@@ -229,10 +216,7 @@ export default function RiskPage() {
                     {risk.resolved
                       ? <span className={styles.resolvedBadge}>✓ 해결됨</span>
                       : <span className={styles.activeBadge}>● 처리 중</span>}
-                    <button
-                      className={risk.resolved ? styles.btnReopen : styles.btnResolve}
-                      onClick={() => toggleResolve(risk.id)}
-                    >
+                    <button className={risk.resolved ? styles.btnReopen : styles.btnResolve} onClick={() => toggleResolve(risk.id)}>
                       {risk.resolved ? '다시 열기' : '해결 완료'}
                     </button>
                   </div>
@@ -259,9 +243,7 @@ export default function RiskPage() {
                 <div className={styles.panelInfoItem}><span className={styles.panelInfoLabel}>직급</span><span className={styles.panelInfoValue}>-</span></div>
                 <div className={styles.panelInfoItem}><span className={styles.panelInfoLabel}>부서</span><span className={styles.panelInfoValue}>-</span></div>
               </div>
-              <button className={styles.panelEditBtn} onClick={() => { setShowProfile(false); navigate('/profile') }}>
-                ✏️ 프로필 수정하기
-              </button>
+              <button className={styles.panelEditBtn} onClick={() => { setShowProfile(false); navigate('/profile') }}>✏️ 프로필 수정하기</button>
             </div>
           </div>
         </div>
