@@ -14,32 +14,46 @@ export default function ReportPage() {
   const [generating, setGenerating] = useState(false)
   const [project, setProject] = useState(null)
   const [showProfile, setShowProfile] = useState(false)
+  const [showProjectModal, setShowProjectModal] = useState(false)
+  const [allProjects, setAllProjects] = useState([])
+  const [selectedProjectUuid, setSelectedProjectUuid] = useState(id)
   const nickname = localStorage.getItem('nickname') || '사용자'
 
   useEffect(() => {
     if (!id) return
-    // localStorage에서 먼저 불러오기 (새로고침 유지)
     const saved = localStorage.getItem(STORAGE_KEY(id))
     if (saved) {
       const parsed = JSON.parse(saved)
       setReports(parsed)
       if (parsed.length > 0) setSelected(parsed[0])
     }
-
     client.get(`/api/project/${id}`)
       .then(res => setProject(res.data))
       .catch(() => {})
   }, [id])
 
-  const saveReports = (updated) => {
-    localStorage.setItem(STORAGE_KEY(id), JSON.stringify(updated))
+  useEffect(() => {
+    client.get('/api/project')
+      .then(res => setAllProjects([...(res.data || [])].reverse()))
+      .catch(() => {})
+  }, [])
+
+  const saveReports = (updated, projectId) => {
+    localStorage.setItem(STORAGE_KEY(projectId || id), JSON.stringify(updated))
     setReports(updated)
   }
 
+  const handleGenerateClick = () => {
+    setSelectedProjectUuid(id)
+    setShowProjectModal(true)
+  }
+
   const handleGenerate = async () => {
+    setShowProjectModal(false)
     setGenerating(true)
     try {
-      const taskRes = await client.get(`/api/task/project/${id}`)
+      const targetProject = allProjects.find(p => p.uuid === selectedProjectUuid) || project
+      const taskRes = await client.get(`/api/task/project/${selectedProjectUuid}`)
       const tasks = taskRes.data || []
 
       const doneTasks = tasks.filter(t => t.status === 'COMPLETED')
@@ -49,22 +63,25 @@ export default function ReportPage() {
 
       const newReport = {
         id: Date.now(),
-        title: `${project?.name || '프로젝트'} 주간 보고서`,
-        project: project?.name || '프로젝트',
+        title: `${targetProject?.name || '프로젝트'} 주간 보고서`,
+        project: targetProject?.name || '프로젝트',
+        projectUuid: selectedProjectUuid,
         date: new Date().toISOString().split('T')[0],
         type: 'weekly',
-        summary: `${project?.name || '프로젝트'}의 전체 태스크 중 ${totalPct}%가 완료되었습니다.`,
+        summary: `${targetProject?.name || '프로젝트'}의 전체 태스크 중 ${totalPct}%가 완료되었습니다.`,
         sections: [
           { title: '📈 진행 상황', content: `전체 ${tasks.length}개 태스크 중 ${doneTasks.length}개 완료, ${inProgressTasks.length}개 진행 중, ${todoTasks.length}개 대기 중입니다. (완료율 ${totalPct}%)` },
           { title: '✅ 주요 성과', content: doneTasks.length > 0 ? `완료된 태스크: ${doneTasks.map(t => t.title).join(', ')}` : '아직 완료된 태스크가 없습니다.' },
           { title: '⚠️ 이슈 및 리스크', content: `현재 ${inProgressTasks.length}개 태스크가 진행 중입니다. 지속적인 모니터링이 필요합니다.` },
           { title: '📅 다음 주 계획', content: todoTasks.length > 0 ? `예정된 태스크: ${todoTasks.map(t => t.title).join(', ')}` : '모든 태스크가 진행 중이거나 완료되었습니다.' },
-          { title: '👥 팀 현황', content: project?.members?.length > 0 ? `총 ${project.members.length}명의 팀원이 협업 중입니다.` : '팀원 정보가 없습니다.' },
+          { title: '👥 팀 현황', content: targetProject?.members?.length > 0 ? `총 ${targetProject.members.length}명의 팀원이 협업 중입니다.` : '팀원 정보가 없습니다.' },
         ]
       }
 
-      const updated = [newReport, ...reports]
-      saveReports(updated)
+      const existing = localStorage.getItem(STORAGE_KEY(selectedProjectUuid))
+      const prev = existing ? JSON.parse(existing) : []
+      const updated = [newReport, ...prev]
+      saveReports(updated, selectedProjectUuid)
       setSelected(newReport)
     } catch (err) {
       const msg = err?.response?.data?.message || err?.message || String(err)
@@ -72,6 +89,14 @@ export default function ReportPage() {
     } finally {
       setGenerating(false)
     }
+  }
+
+  const handleDeleteReport = (e, reportId) => {
+    e.stopPropagation()
+    if (!window.confirm('보고서를 삭제할까요?')) return
+    const updated = reports.filter(r => r.id !== reportId)
+    saveReports(updated)
+    if (selected?.id === reportId) setSelected(updated.length > 0 ? updated[0] : null)
   }
 
   return (
@@ -86,7 +111,7 @@ export default function ReportPage() {
               <p className={styles.headerSub}>AI가 프로젝트 현황을 자동으로 분석합니다</p>
             </div>
           </div>
-          <button className={styles.btnAi} onClick={handleGenerate} disabled={generating}>
+          <button className={styles.btnAi} onClick={handleGenerateClick} disabled={generating}>
             {generating ? <><span className={styles.spinner} /> 생성 중...</> : <><span className={styles.aiDot} /> 보고서 자동 생성</>}
           </button>
         </header>
@@ -103,12 +128,27 @@ export default function ReportPage() {
                 </div>
               ) : (
                 reports.map(r => (
-                  <div key={r.id} className={`${styles.reportItem} ${selected?.id === r.id ? styles.reportItemActive : ''}`} onClick={() => setSelected(r)}>
+                  <div
+                    key={r.id}
+                    className={`${styles.reportItem} ${selected?.id === r.id ? styles.reportItemActive : ''}`}
+                    onClick={() => setSelected(r)}
+                  >
                     <span className={styles.reportItemIcon}>📄</span>
-                    <div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
                       <div className={styles.reportItemTitle}>{r.title}</div>
                       <div className={styles.reportItemMeta}>{r.date} · {r.project}</div>
                     </div>
+                    <button
+                      onClick={(e) => handleDeleteReport(e, r.id)}
+                      style={{
+                        background: '#FEECEC', border: 'none', cursor: 'pointer',
+                        color: '#F05A5A', fontSize: '10px', fontWeight: 600,
+                        padding: '2px 7px', borderRadius: '5px',
+                        fontFamily: 'inherit', flexShrink: 0
+                      }}
+                    >
+                      삭제
+                    </button>
                   </div>
                 ))
               )}
@@ -146,6 +186,43 @@ export default function ReportPage() {
           </div>
         </div>
       </div>
+
+      {/* 프로젝트 선택 모달 */}
+      {showProjectModal && (
+        <div className={styles.modalOverlay} onClick={() => setShowProjectModal(false)}>
+          <div className={styles.modal} onClick={e => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h2>보고서 생성할 프로젝트 선택</h2>
+              <button onClick={() => setShowProjectModal(false)}>✕</button>
+            </div>
+            <div className={styles.modalBody}>
+              {allProjects.length === 0 ? (
+                <p style={{ color: '#9BBEC5', textAlign: 'center', padding: '20px' }}>프로젝트가 없습니다</p>
+              ) : (
+                allProjects.map(p => (
+                  <div
+                    key={p.uuid}
+                    onClick={() => setSelectedProjectUuid(p.uuid)}
+                    style={{
+                      padding: '12px 14px', borderRadius: '10px', cursor: 'pointer',
+                      border: `1.5px solid ${selectedProjectUuid === p.uuid ? '#3BBFD4' : '#D6EFF4'}`,
+                      background: selectedProjectUuid === p.uuid ? '#E0F7FB' : '#fff',
+                      marginBottom: '8px', transition: 'all 0.13s'
+                    }}
+                  >
+                    <div style={{ fontSize: '13px', fontWeight: 600, color: '#0F2A31' }}>{p.name}</div>
+                    <div style={{ fontSize: '11px', color: '#9BBEC5', marginTop: '2px' }}>마감 {p.endDate || '-'}</div>
+                  </div>
+                ))
+              )}
+            </div>
+            <div className={styles.modalFooter}>
+              <button className={styles.cancelBtn} onClick={() => setShowProjectModal(false)}>취소</button>
+              <button className={styles.saveBtn} onClick={handleGenerate} disabled={!selectedProjectUuid}>생성</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showProfile && (
         <div className={styles.panelOverlay} onClick={() => setShowProfile(false)}>

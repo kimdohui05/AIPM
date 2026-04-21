@@ -60,3 +60,14 @@
 .panelInfoLabel { font-size: 12.5px; color: #527880; font-weight: 500; }
 .panelInfoValue { font-size: 13px; color: #0F2A31; font-weight: 600; }
 .panelEditBtn { width: 100%; padding: 12px; background: linear-gradient(135deg, #3BBFD4, #1E9CB5); color: #fff; border: none; border-radius: 10px; font-size: 13.5px; font-weight: 700; cursor: pointer; font-family: inherit; box-shadow: 0 2px 10px rgba(59,191,212,0.3); }
+.modalOverlay { position: fixed; inset: 0; background: rgba(15,42,49,0.45); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 20px; }
+.modal { background: #fff; border-radius: 16px; width: 100%; max-width: 400px; box-shadow: 0 8px 40px rgba(15,42,49,0.18); }
+.modalHeader { display: flex; align-items: center; justify-content: space-between; padding: 18px 22px; border-bottom: 1px solid #D6EFF4; }
+.modalHeader h2 { font-size: 15px; font-weight: 700; color: #0F2A31; }
+.modalHeader button { background: none; border: none; font-size: 16px; color: #9BBEC5; cursor: pointer; }
+.modalBody { padding: 20px 22px; max-height: 300px; overflow-y: auto; }
+.modalFooter { display: flex; gap: 10px; padding: 16px 22px; border-top: 1px solid #D6EFF4; }
+.cancelBtn { padding: 10px 18px; border-radius: 9px; border: 1.5px solid #D6EFF4; background: #fff; font-size: 13px; font-weight: 600; color: #527880; cursor: pointer; font-family: inherit; }
+.cancelBtn:hover { border-color: #3BBFD4; color: #1E9CB5; }
+.saveBtn { flex: 1; padding: 10px; background: linear-gradient(135deg, #3BBFD4, #1E9CB5); color: #fff; border: none; border-radius: 9px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; }
+.saveBtn:disabled { opacity: 0.5; cursor: not-allowed; }
