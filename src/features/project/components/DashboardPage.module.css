@@ -387,3 +387,36 @@
     font-size: 13px;
   }
 }
+
+/* 간트차트 */
+.ganttWrap { display: flex; flex-direction: column; gap: 0; }
+.ganttHeader { position: relative; height: 24px; margin-bottom: 4px; margin-left: 140px; }
+.ganttDateLabel { position: absolute; font-size: 10px; color: #9BBEC5; transform: translateX(-50%); }
+.ganttGrid { position: relative; height: 0; margin-left: 140px; }
+.ganttGridLine { position: absolute; top: 0; bottom: 0; width: 1px; background: #EEF7FA; height: 100vh; pointer-events: none; }
+.ganttTodayLine { position: absolute; top: -4px; width: 1.5px; background: #F05A5A; height: 100vh; z-index: 2; }
+.ganttTodayLabel { position: absolute; top: -18px; left: 50%; transform: translateX(-50%); font-size: 9px; color: #F05A5A; font-weight: 700; white-space: nowrap; }
+.ganttRows { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+.ganttRow { display: flex; align-items: center; gap: 0; height: 28px; }
+.ganttLabel { width: 140px; flex-shrink: 0; display: flex; align-items: center; gap: 6px; padding-right: 12px; }
+.ganttLabelDot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.ganttLabel span { font-size: 11.5px; color: #0F2A31; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 110px; }
+.ganttBarWrap { flex: 1; position: relative; height: 100%; background: #F7FCFD; border-radius: 6px; overflow: visible; }
+.ganttBar { position: absolute; top: 50%; transform: translateY(-50%); height: 18px; border-radius: 6px; min-width: 18px; cursor: pointer; transition: opacity 0.2s; }
+.ganttBar:hover { opacity: 0.8 !important; }
+.ganttLegend { display: flex; gap: 16px; margin-top: 12px; padding-top: 10px; border-top: 1px solid #D6EFF4; }
+.ganttLegendItem { display: flex; align-items: center; gap: 5px; font-size: 11px; color: #527880; }
+.ganttLegendDot { width: 10px; height: 10px; border-radius: 3px; }
+
+/* 차트 */
+.chartRow { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.donutWrap { display: flex; align-items: center; gap: 8px; }
+.donutLegend { display: flex; flex-direction: column; gap: 8px; }
+.donutLegendItem { display: flex; align-items: center; gap: 7px; font-size: 12px; color: #527880; }
+.donutLegendDot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.donutLegendItem strong { color: #0F2A31; margin-left: 2px; }
+
+@media (max-width: 768px) {
+  .chartRow { grid-template-columns: 1fr; }
+  .donutWrap { flex-direction: column; }
+}

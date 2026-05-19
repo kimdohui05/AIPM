@@ -51,6 +51,8 @@ export default function TaskBoardPage() {
   const [loading, setLoading] = useState(false)
   const [showProfile, setShowProfile] = useState(false)
   const [aiGenerating, setAiGenerating] = useState(!!location.state?.aiGenerating)
+  const [dragOverCol, setDragOverCol] = useState(null)
+  const dragTaskUuid = useRef(null)
   const pollRef = useRef(null)
   const nickname = localStorage.getItem('nickname') || '사용자'
 
@@ -95,14 +97,52 @@ export default function TaskBoardPage() {
 
   const getTasksByStatus = (status) => tasks.filter(t => t.status === status)
 
-  const changeStatus = async (taskUuid, status) => {
-    const task = tasks.find(t => t.uuid === taskUuid)
-    const progress = status === 'done' ? 100 : status === 'todo' ? 0 : task?.progress
-    try {
-      const res = await client.put(`/api/task/${taskUuid}`, { status: toBackStatus(status), progress })
-      setTasks(tasks.map(t => t.uuid === taskUuid ? mapTask(res.data) : t))
-    } catch (err) { console.error('상태 변경 실패:', err) }
+  // 드래그앤드롭 핸들러
+  const handleDragStart = (e, taskUuid) => {
+    dragTaskUuid.current = taskUuid
+    e.dataTransfer.effectAllowed = 'move'
   }
+
+  const handleDragOver = (e, colKey) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'move'
+    setDragOverCol(colKey)
+  }
+
+  const handleDragLeave = () => {
+    setDragOverCol(null)
+  }
+
+  const handleDrop = async (e, colKey) => {
+    e.preventDefault()
+    setDragOverCol(null)
+    const taskUuid = dragTaskUuid.current
+    if (!taskUuid) return
+    const task = tasks.find(t => t.uuid === taskUuid)
+    if (!task || task.status === colKey) return
+    await changeStatus(taskUuid, colKey)
+    dragTaskUuid.current = null
+  }
+
+  const handleDragEnd = () => {
+    setDragOverCol(null)
+    dragTaskUuid.current = null
+  }
+
+  const changeStatus = async (taskUuid, status) => {
+  const task = tasks.find(t => t.uuid === taskUuid)
+  const progress = status === 'done' ? 100 : status === 'todo' ? 0 : task?.progress
+  // 낙관적 업데이트
+  setTasks(prev => prev.map(t => t.uuid === taskUuid ? { ...t, status, progress } : t))
+  try {
+    await client.put(`/api/task/${taskUuid}`, { status: toBackStatus(status), progress })
+    // API 성공해도 이미 UI 반영됐으니 상태 유지
+  } catch (err) {
+    console.error('상태 변경 실패:', err)
+    // 실패 시만 원복
+    loadTasks()
+  }
+}
 
   const changeProgress = async (taskUuid, progress) => {
     try {
@@ -224,7 +264,13 @@ export default function TaskBoardPage() {
             </div>
           ) : (
             columns.map(col => (
-              <div key={col.key} className={styles.column}>
+              <div
+                key={col.key}
+                className={`${styles.column} ${dragOverCol === col.key ? styles.columnDragOver : ''}`}
+                onDragOver={e => handleDragOver(e, col.key)}
+                onDragLeave={handleDragLeave}
+                onDrop={e => handleDrop(e, col.key)}
+              >
                 <div className={styles.columnHeader}>
                   <div className={styles.columnDot} style={{ background: col.color }} />
                   <span className={styles.columnLabel}>{col.label}</span>
@@ -232,7 +278,13 @@ export default function TaskBoardPage() {
                 </div>
                 <div className={styles.columnBody}>
                   {getTasksByStatus(col.key).map(task => (
-                    <div key={task.uuid} className={styles.taskCard}>
+                    <div
+                      key={task.uuid}
+                      className={styles.taskCard}
+                      draggable
+                      onDragStart={e => handleDragStart(e, task.uuid)}
+                      onDragEnd={handleDragEnd}
+                    >
                       <div className={styles.taskCardTop}>
                         <span className={`${styles.priorityBadge} ${styles[PRIORITY_CLASS[task.priority]]}`}>
                           {PRIORITY_LABEL[task.priority]}
@@ -277,7 +329,9 @@ export default function TaskBoardPage() {
                     </div>
                   ))}
                   {getTasksByStatus(col.key).length === 0 && (
-                    <div className={styles.emptyCol}><p>태스크 없음</p></div>
+                    <div className={`${styles.emptyCol} ${dragOverCol === col.key ? styles.emptyColDragOver : ''}`}>
+                      <p>{dragOverCol === col.key ? '여기에 놓기' : '태스크 없음'}</p>
+                    </div>
                   )}
                 </div>
               </div>
