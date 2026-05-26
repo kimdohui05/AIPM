@@ -121,8 +121,8 @@
 }
 
 /* 드래그앤드롭 */
-.taskCard[draggable="true"] { cursor: grab; }
-.taskCard[draggable="true"]:active { cursor: grabbing; opacity: 0.7; }
+.taskCard[draggable="true"] { cursor: default; }
+.taskCard[draggable="true"]:active { cursor: default; opacity: 0.7; }
 
 .columnDragOver {
   border-color: #3BBFD4 !important;

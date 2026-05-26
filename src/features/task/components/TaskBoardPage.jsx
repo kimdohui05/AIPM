@@ -129,24 +129,21 @@ export default function TaskBoardPage() {
     dragTaskUuid.current = null
   }
 
-  const changeStatus = async (taskUuid, status) => {
-  const task = tasks.find(t => t.uuid === taskUuid)
-  const progress = status === 'done' ? 100 : status === 'todo' ? 0 : task?.progress
-  // 낙관적 업데이트
-  setTasks(prev => prev.map(t => t.uuid === taskUuid ? { ...t, status, progress } : t))
-  try {
-    await client.put(`/api/task/${taskUuid}`, { status: toBackStatus(status), progress })
-    // API 성공해도 이미 UI 반영됐으니 상태 유지
-  } catch (err) {
-    console.error('상태 변경 실패:', err)
-    // 실패 시만 원복
-    loadTasks()
+const changeStatus = async (taskUuid, status) => {
+    const task = tasks.find(t => t.uuid === taskUuid)
+    const progress = status === 'done' ? 100 : status === 'todo' ? 0 : task?.progress
+    setTasks(prev => prev.map(t => t.uuid === taskUuid ? { ...t, status, progress } : t))
+    try {
+      await client.patch(`/api/task/${taskUuid}`, { status: toBackStatus(status), progress })
+    } catch (err) {
+      console.error('상태 변경 실패:', err)
+      loadTasks()
+    }
   }
-}
 
   const changeProgress = async (taskUuid, progress) => {
     try {
-      const res = await client.put(`/api/task/${taskUuid}`, { progress: Number(progress) })
+      const res = await client.patch(`/api/task/${taskUuid}`, { progress: Number(progress) })
       setTasks(tasks.map(t => t.uuid === taskUuid ? mapTask(res.data) : t))
     } catch (err) { console.error('진행률 변경 실패:', err) }
   }
@@ -180,7 +177,7 @@ export default function TaskBoardPage() {
         })
         setTasks([...tasks, mapTask(res.data)])
       } else {
-        const res = await client.put(`/api/task/${editTask.uuid}`, {
+        const res = await client.patch(`/api/task/${editTask.uuid}`, {
           title: editTask.title,
           description: editTask.description,
           assigneeName: editTask.assignee,
