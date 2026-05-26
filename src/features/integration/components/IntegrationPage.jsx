@@ -8,10 +8,14 @@ export default function IntegrationPage() {
   const [showProfile, setShowProfile] = useState(false)
   const nickname = localStorage.getItem('nickname') || '사용자'
 
-  const [integrations, setIntegrations] = useState([
+  const [integrations, setIntegrations] = useState(() => {
+  const saved = localStorage.getItem('integrations')
+  if (saved) return JSON.parse(saved)
+  return [
     { id: 'github', name: 'GitHub', icon: '🐙', desc: '레포지토리 연동으로 커밋, PR 현황을 태스크와 연결합니다.', connected: false, value: '', placeholder: 'GitHub 레포지토리 URL' },
     { id: 'notion', name: 'Notion', icon: '📝', desc: '프로젝트 문서와 회의록을 Notion과 동기화합니다.', connected: false, value: '', placeholder: 'Notion API Key' },
-  ])
+  ]
+})
 
   const [editing, setEditing] = useState(null)
   const [inputVal, setInputVal] = useState('')
@@ -23,16 +27,20 @@ export default function IntegrationPage() {
   }
 
   const handleSave = (id) => {
-    if (!inputVal.trim()) return
-    setIntegrations(integrations.map(i => i.id === id ? { ...i, connected: true, value: inputVal.trim() } : i))
-    setEditing(null)
-    setInputVal('')
-  }
+  if (!inputVal.trim()) return
+  const updated = integrations.map(i => i.id === id ? { ...i, connected: true, value: inputVal.trim() } : i)
+  setIntegrations(updated)
+  localStorage.setItem('integrations', JSON.stringify(updated))
+  setEditing(null)
+  setInputVal('')
+}
 
-  const handleDisconnect = (id) => {
-    if (!window.confirm('연동을 해제할까요?')) return
-    setIntegrations(integrations.map(i => i.id === id ? { ...i, connected: false, value: '' } : i))
-  }
+const handleDisconnect = (id) => {
+  if (!window.confirm('연동을 해제할까요?')) return
+  const updated = integrations.map(i => i.id === id ? { ...i, connected: false, value: '' } : i)
+  setIntegrations(updated)
+  localStorage.setItem('integrations', JSON.stringify(updated))
+}
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#F0F8FA' }}>
