@@ -52,6 +52,7 @@ export default function TaskBoardPage() {
   const [showProfile, setShowProfile] = useState(false)
   const [aiGenerating, setAiGenerating] = useState(!!location.state?.aiGenerating)
   const [dragOverCol, setDragOverCol] = useState(null)
+  const [deleteTarget, setDeleteTarget] = useState(null) // 삭제 모달용
   const dragTaskUuid = useRef(null)
   const pollRef = useRef(null)
   const nickname = localStorage.getItem('nickname') || '사용자'
@@ -97,22 +98,16 @@ export default function TaskBoardPage() {
 
   const getTasksByStatus = (status) => tasks.filter(t => t.status === status)
 
-  // 드래그앤드롭 핸들러
   const handleDragStart = (e, taskUuid) => {
     dragTaskUuid.current = taskUuid
     e.dataTransfer.effectAllowed = 'move'
   }
-
   const handleDragOver = (e, colKey) => {
     e.preventDefault()
     e.dataTransfer.dropEffect = 'move'
     setDragOverCol(colKey)
   }
-
-  const handleDragLeave = () => {
-    setDragOverCol(null)
-  }
-
+  const handleDragLeave = () => setDragOverCol(null)
   const handleDrop = async (e, colKey) => {
     e.preventDefault()
     setDragOverCol(null)
@@ -123,13 +118,12 @@ export default function TaskBoardPage() {
     await changeStatus(taskUuid, colKey)
     dragTaskUuid.current = null
   }
-
   const handleDragEnd = () => {
     setDragOverCol(null)
     dragTaskUuid.current = null
   }
 
-const changeStatus = async (taskUuid, status) => {
+  const changeStatus = async (taskUuid, status) => {
     const task = tasks.find(t => t.uuid === taskUuid)
     const progress = status === 'done' ? 100 : status === 'todo' ? 0 : task?.progress
     setTasks(prev => prev.map(t => t.uuid === taskUuid ? { ...t, status, progress } : t))
@@ -150,12 +144,20 @@ const changeStatus = async (taskUuid, status) => {
 
   const openEdit = (task) => { setEditTask({ ...task }); setShowModal(true) }
 
-  const handleDelete = async (taskUuid) => {
-    if (!window.confirm('태스크를 삭제할까요?')) return
+  // 삭제 모달 열기
+  const handleDeleteClick = (task) => setDeleteTarget(task)
+
+  // 실제 삭제 실행
+  const handleDeleteConfirm = async () => {
+    if (!deleteTarget) return
     try {
-      await client.delete(`/api/task/${taskUuid}`)
-      setTasks(tasks.filter(t => t.uuid !== taskUuid))
-    } catch (err) { console.error('삭제 실패:', err) }
+      await client.delete(`/api/task/${deleteTarget.uuid}`)
+      setTasks(tasks.filter(t => t.uuid !== deleteTarget.uuid))
+      setDeleteTarget(null)
+    } catch (err) {
+      console.error('삭제 실패:', err)
+      alert('삭제에 실패했습니다.')
+    }
   }
 
   const handleAddTask = () => {
@@ -288,7 +290,7 @@ const changeStatus = async (taskUuid, status) => {
                         </span>
                         <div className={styles.taskActions}>
                           <button onClick={() => openEdit(task)}>✏️</button>
-                          <button onClick={() => handleDelete(task.uuid)}>🗑️</button>
+                          <button onClick={() => handleDeleteClick(task)}>🗑️</button>
                         </div>
                       </div>
                       <div className={styles.taskTitle}>{task.title}</div>
@@ -336,6 +338,7 @@ const changeStatus = async (taskUuid, status) => {
           )}
         </div>
 
+        {/* 수정/추가 모달 */}
         {showModal && editTask && (
           <div className={styles.modalOverlay} onClick={() => setShowModal(false)}>
             <div className={styles.modal} onClick={e => e.stopPropagation()}>
@@ -350,7 +353,20 @@ const changeStatus = async (taskUuid, status) => {
                 </div>
                 <div className={styles.formGroup}>
                   <label>내용</label>
-                  <textarea rows={3} value={editTask.description || ''} onChange={e => setEditTask({ ...editTask, description: e.target.value })} placeholder="태스크 내용을 입력하세요" />
+                  <textarea
+                    rows={3}
+                    value={editTask.description || ''}
+                    onChange={e => setEditTask({ ...editTask, description: e.target.value })}
+                    placeholder="태스크 내용을 입력하세요"
+                    style={{
+                      padding: '9px 13px', border: '1.5px solid #D6EFF4', borderRadius: '9px',
+                      fontSize: '13px', fontFamily: 'inherit', color: '#0F2A31',
+                      background: '#F7FCFD', outline: 'none', resize: 'vertical',
+                      transition: 'border-color 0.15s', width: '100%', boxSizing: 'border-box'
+                    }}
+                    onFocus={e => e.target.style.borderColor = '#3BBFD4'}
+                    onBlur={e => e.target.style.borderColor = '#D6EFF4'}
+                  />
                 </div>
                 <div className={styles.formGroup}>
                   <label>담당자</label>
@@ -376,19 +392,45 @@ const changeStatus = async (taskUuid, status) => {
                 </div>
                 <div className={styles.formGroup}>
                   <label>마감일</label>
-                  <input
-                    type="text"
-                    value={editTask.due}
-                    onChange={handleDueChange}
-                    placeholder="YYYY-MM-DD"
-                    maxLength={10}
-                  />
+                  <input type="text" value={editTask.due} onChange={handleDueChange} placeholder="YYYY-MM-DD" maxLength={10} />
                 </div>
               </div>
               <div className={styles.modalFooter}>
                 <button className={styles.cancelBtn} onClick={() => setShowModal(false)}>취소</button>
                 <button className={styles.saveBtn} onClick={handleSave} disabled={loading}>
                   {loading ? '저장 중...' : '저장'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 삭제 확인 모달 */}
+        {deleteTarget && (
+          <div className={styles.modalOverlay} onClick={() => setDeleteTarget(null)}>
+            <div className={styles.modal} onClick={e => e.stopPropagation()} style={{ maxWidth: '360px' }}>
+              <div className={styles.modalHeader}>
+                <h2>태스크 삭제</h2>
+                <button onClick={() => setDeleteTarget(null)}>✕</button>
+              </div>
+              <div className={styles.modalBody}>
+                <p style={{ fontSize: '14px', color: '#0F2A31', marginBottom: '6px' }}>
+                  아래 태스크를 삭제할까요?
+                </p>
+                <div style={{ background: '#F7FCFD', border: '1px solid #D6EFF4', borderRadius: '8px', padding: '12px 14px' }}>
+                  <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#0F2A31' }}>{deleteTarget.title}</div>
+                  {deleteTarget.assignee && <div style={{ fontSize: '12px', color: '#9BBEC5', marginTop: '4px' }}>담당자: {deleteTarget.assignee}</div>}
+                </div>
+                <p style={{ fontSize: '12px', color: '#F05A5A', marginTop: '10px' }}>삭제 후 복구할 수 없습니다.</p>
+              </div>
+              <div className={styles.modalFooter}>
+                <button className={styles.cancelBtn} onClick={() => setDeleteTarget(null)}>취소</button>
+                <button
+                  className={styles.saveBtn}
+                  style={{ background: 'linear-gradient(135deg, #F05A5A, #e04444)' }}
+                  onClick={handleDeleteConfirm}
+                >
+                  삭제
                 </button>
               </div>
             </div>

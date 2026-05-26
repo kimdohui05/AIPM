@@ -136,3 +136,11 @@
   border-radius: 8px;
   border: 2px dashed #3BBFD4;
 }
+
+.formGroup textarea {
+  padding: 9px 13px; border: 1.5px solid #D6EFF4; border-radius: 9px;
+  font-size: 13px; font-family: inherit; color: #0F2A31;
+  background: #F7FCFD; outline: none; resize: vertical;
+  transition: border-color 0.15s; width: 100%; box-sizing: border-box;
+}
+.formGroup textarea:focus { border-color: #3BBFD4; background: #fff; }
