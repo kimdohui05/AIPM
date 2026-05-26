@@ -34,21 +34,28 @@ export default function RiskPage() {
   const [analyzing, setAnalyzing] = useState(false)
   const [project, setProject] = useState(null)
   const [showProfile, setShowProfile] = useState(false)
+  const [showProjectModal, setShowProjectModal] = useState(false)
+  const [allProjects, setAllProjects] = useState([])
+  const [selectedProjectUuid, setSelectedProjectUuid] = useState(id)
   const nickname = localStorage.getItem('nickname') || '사용자'
 
   useEffect(() => {
     if (!id) return
-    // localStorage에서 먼저 불러오기 (새로고침 유지)
     const saved = localStorage.getItem(STORAGE_KEY(id))
     if (saved) setRisks(JSON.parse(saved))
-
     client.get(`/api/project/${id}`)
       .then(res => setProject(res.data))
       .catch(() => {})
   }, [id])
 
-  const saveRisks = (updated) => {
-    localStorage.setItem(STORAGE_KEY(id), JSON.stringify(updated))
+  useEffect(() => {
+    client.get('/api/project')
+      .then(res => setAllProjects([...(res.data || [])].reverse()))
+      .catch(() => {})
+  }, [])
+
+  const saveRisks = (updated, projectId) => {
+    localStorage.setItem(STORAGE_KEY(projectId || id), JSON.stringify(updated))
     setRisks(updated)
   }
 
@@ -63,10 +70,18 @@ export default function RiskPage() {
     saveRisks(updated)
   }
 
+  const handleAnalyzeClick = () => {
+    setSelectedProjectUuid(id)
+    setShowProjectModal(true)
+  }
+
   const handleAnalyze = async () => {
+    setShowProjectModal(false)
     setAnalyzing(true)
     try {
-      const taskRes = await client.get(`/api/task/project/${id}`)
+      const targetProject = allProjects.find(p => p.uuid === selectedProjectUuid) || project
+
+      const taskRes = await client.get(`/api/task/project/${selectedProjectUuid}`)
       const tasks = taskRes.data || []
 
       if (tasks.length === 0) {
@@ -92,9 +107,9 @@ export default function RiskPage() {
       })
 
       const res = await client.post('/api/ai/pm-analysis', {
-        projectName: project?.name || '프로젝트',
-        startDate: project?.startDate || new Date().toISOString().slice(0, 10),
-        endDate: project?.endDate || new Date().toISOString().slice(0, 10),
+        projectName: targetProject?.name || '프로젝트',
+        startDate: targetProject?.startDate || new Date().toISOString().slice(0, 10),
+        endDate: targetProject?.endDate || new Date().toISOString().slice(0, 10),
         members,
         tasks: tasks.map(t => ({
           taskUuid: t.uuid,
@@ -107,6 +122,11 @@ export default function RiskPage() {
         })),
       })
 
+      const existingRisks = (() => {
+        const saved = localStorage.getItem(STORAGE_KEY(selectedProjectUuid))
+        return saved ? JSON.parse(saved) : []
+      })()
+
       const newRisks = (res.data.riskWarnings || []).map((w, i) => ({
         id: Date.now() + i,
         type: TYPE_MAP[w.type] || 'technical',
@@ -114,13 +134,13 @@ export default function RiskPage() {
         title: w.message,
         desc: w.relatedMember ? `관련 팀원: ${w.relatedMember}` : '',
         rec: getRec(w.type),
-        project: project?.name || '현재 프로젝트',
+        project: targetProject?.name || '현재 프로젝트',
         detectedAt: new Date().toLocaleString('ko-KR'),
         resolved: false,
       }))
 
-      const updated = [...newRisks, ...risks.filter(r => r.resolved)]
-      saveRisks(updated)
+      const updated = [...newRisks, ...existingRisks.filter(r => r.resolved)]
+      saveRisks(updated, selectedProjectUuid)
     } catch (err) {
       const msg = err?.response?.data?.message || err?.response?.data || err?.message || String(err)
       alert(`분석 실패: ${msg}`)
@@ -148,7 +168,7 @@ export default function RiskPage() {
               </p>
             </div>
           </div>
-          <button className={styles.btnAi} onClick={handleAnalyze} disabled={analyzing}>
+          <button className={styles.btnAi} onClick={handleAnalyzeClick} disabled={analyzing}>
             {analyzing
               ? <><span className={styles.spinner} /> 분석 중...</>
               : <><span className={styles.aiDot} /> AI 재분석</>}
@@ -226,6 +246,43 @@ export default function RiskPage() {
           )}
         </div>
       </div>
+
+      {/* 프로젝트 선택 모달 */}
+      {showProjectModal && (
+        <div className={styles.modalOverlay} onClick={() => setShowProjectModal(false)}>
+          <div className={styles.modal} onClick={e => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <h2>분석할 프로젝트 선택</h2>
+              <button onClick={() => setShowProjectModal(false)}>✕</button>
+            </div>
+            <div className={styles.modalBody}>
+              {allProjects.length === 0 ? (
+                <p style={{ color: '#9BBEC5', textAlign: 'center', padding: '20px' }}>프로젝트가 없습니다</p>
+              ) : (
+                allProjects.map(p => (
+                  <div
+                    key={p.uuid}
+                    onClick={() => setSelectedProjectUuid(p.uuid)}
+                    style={{
+                      padding: '12px 14px', borderRadius: '10px', cursor: 'pointer',
+                      border: `1.5px solid ${selectedProjectUuid === p.uuid ? '#3BBFD4' : '#D6EFF4'}`,
+                      background: selectedProjectUuid === p.uuid ? '#E0F7FB' : '#fff',
+                      marginBottom: '8px', transition: 'all 0.13s'
+                    }}
+                  >
+                    <div style={{ fontSize: '13px', fontWeight: 600, color: '#0F2A31' }}>{p.name}</div>
+                    <div style={{ fontSize: '11px', color: '#9BBEC5', marginTop: '2px' }}>마감 {p.endDate || '-'}</div>
+                  </div>
+                ))
+              )}
+            </div>
+            <div className={styles.modalFooter}>
+              <button className={styles.cancelBtn} onClick={() => setShowProjectModal(false)}>취소</button>
+              <button className={styles.saveBtn} onClick={handleAnalyze} disabled={!selectedProjectUuid}>분석 시작</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showProfile && (
         <div className={styles.panelOverlay} onClick={() => setShowProfile(false)}>

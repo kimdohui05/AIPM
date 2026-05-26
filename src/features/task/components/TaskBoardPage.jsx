@@ -421,7 +421,7 @@ export default function TaskBoardPage() {
                   <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#0F2A31' }}>{deleteTarget.title}</div>
                   {deleteTarget.assignee && <div style={{ fontSize: '12px', color: '#9BBEC5', marginTop: '4px' }}>담당자: {deleteTarget.assignee}</div>}
                 </div>
-                <p style={{ fontSize: '12px', color: '#F05A5A', marginTop: '10px' }}>삭제 후 복구할 수 없습니다.</p>
+                <p style={{ fontSize: '12px', color: '#F05A5A', marginTop: '10px', textAlign: 'center'}}>삭제 후 복구할 수 없습니다.</p>
               </div>
               <div className={styles.modalFooter}>
                 <button className={styles.cancelBtn} onClick={() => setDeleteTarget(null)}>취소</button>
