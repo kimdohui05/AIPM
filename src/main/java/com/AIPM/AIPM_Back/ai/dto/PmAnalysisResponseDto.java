@@ -15,7 +15,6 @@ public class PmAnalysisResponseDto {
     @Setter
     public static class RiskWarningDto {
         private String type;
-        private String severity;
         private String message;
         private String relatedTaskUuid;
         private String relatedMember;

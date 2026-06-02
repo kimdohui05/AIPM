@@ -1,5 +1,6 @@
 package com.AIPM.AIPM_Back.task.entity;
 
+import com.AIPM.AIPM_Back.ai.entity.AiCommentEntity;
 import com.AIPM.AIPM_Back.project.entity.ProjectEntity;
 import com.AIPM.AIPM_Back.user.entity.UserEntity;
 import jakarta.persistence.*;
@@ -8,6 +9,8 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -61,6 +64,10 @@ public class TaskEntity {
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "task", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<AiCommentEntity> aiComments = new ArrayList<>();
 
     public void update(String title, String description, String assigneeName,
                        TaskPriority priority, LocalDate dueDate, TaskStatus status, Integer progress) {

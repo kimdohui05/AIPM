@@ -1,5 +1,7 @@
 package com.AIPM.AIPM_Back.project.entity;
 
+import com.AIPM.AIPM_Back.ai.entity.AiCommentEntity;
+import com.AIPM.AIPM_Back.task.entity.TaskEntity;
 import com.AIPM.AIPM_Back.user.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -7,6 +9,8 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -46,6 +50,14 @@ public class ProjectEntity {
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDateTime createdAt;
+
+    @Builder.Default
+    @OneToMany(mappedBy = "project", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<TaskEntity> tasks = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "project", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<AiCommentEntity> aiComments = new ArrayList<>();
 
     public void update(String name, String description, LocalDate startDate, LocalDate endDate) {
         if (name != null) this.name = name;
