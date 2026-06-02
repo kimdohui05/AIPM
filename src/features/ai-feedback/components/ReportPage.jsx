@@ -49,47 +49,59 @@ export default function ReportPage() {
   }
 
   const handleGenerate = async () => {
-    setShowProjectModal(false)
-    setGenerating(true)
-    try {
-      const targetProject = allProjects.find(p => p.uuid === selectedProjectUuid) || project
-      const taskRes = await client.get(`/api/task/project/${selectedProjectUuid}`)
-      const tasks = taskRes.data || []
+  setShowProjectModal(false)
+  setGenerating(true)
+  try {
+    const targetProject = allProjects.find(p => p.uuid === selectedProjectUuid) || project
+    const taskRes = await client.get(`/api/task/project/${selectedProjectUuid}`)
+    const tasks = taskRes.data || []
 
-      const doneTasks = tasks.filter(t => t.status === 'COMPLETED')
-      const inProgressTasks = tasks.filter(t => t.status === 'IN_PROGRESS')
-      const todoTasks = tasks.filter(t => t.status === 'PLANNED')
-      const totalPct = tasks.length > 0 ? Math.round((doneTasks.length / tasks.length) * 100) : 0
-
-      const newReport = {
-        id: Date.now(),
-        title: `${targetProject?.name || '프로젝트'} 주간 보고서`,
-        project: targetProject?.name || '프로젝트',
-        projectUuid: selectedProjectUuid,
-        date: new Date().toISOString().split('T')[0],
-        type: 'weekly',
-        summary: `${targetProject?.name || '프로젝트'}의 전체 태스크 중 ${totalPct}%가 완료되었습니다.`,
-        sections: [
-          { title: '📈 진행 상황', content: `전체 ${tasks.length}개 태스크 중 ${doneTasks.length}개 완료, ${inProgressTasks.length}개 진행 중, ${todoTasks.length}개 대기 중입니다. (완료율 ${totalPct}%)` },
-          { title: '✅ 주요 성과', content: doneTasks.length > 0 ? `완료된 태스크: ${doneTasks.map(t => t.title).join(', ')}` : '아직 완료된 태스크가 없습니다.' },
-          { title: '⚠️ 이슈 및 리스크', content: `현재 ${inProgressTasks.length}개 태스크가 진행 중입니다. 지속적인 모니터링이 필요합니다.` },
-          { title: '📅 다음 주 계획', content: todoTasks.length > 0 ? `예정된 태스크: ${todoTasks.map(t => t.title).join(', ')}` : '모든 태스크가 진행 중이거나 완료되었습니다.' },
-          { title: '👥 팀 현황', content: targetProject?.members?.length > 0 ? `총 ${targetProject.members.length}명의 팀원이 협업 중입니다.` : '팀원 정보가 없습니다.' },
-        ]
-      }
-
-      const existing = localStorage.getItem(STORAGE_KEY(selectedProjectUuid))
-      const prev = existing ? JSON.parse(existing) : []
-      const updated = [newReport, ...prev]
-      saveReports(updated, selectedProjectUuid)
-      setSelected(newReport)
-    } catch (err) {
-      const msg = err?.response?.data?.message || err?.message || String(err)
-      alert(`보고서 생성 실패: ${msg}`)
-    } finally {
-      setGenerating(false)
+    if (tasks.length === 0) {
+      alert('보고서를 생성할 태스크가 없습니다.')
+      return
     }
+
+    // 백엔드 AI 보고서 API 호출
+    const aiRes = await client.post('/api/ai/report', {
+      projectName: targetProject?.name || '프로젝트',
+      startDate: targetProject?.startDate || new Date().toISOString().slice(0, 10),
+      endDate: targetProject?.endDate || new Date().toISOString().slice(0, 10),
+      tasks: tasks.map(t => ({
+        title: t.title,
+        description: t.description || '',
+        status: t.status,
+        priority: t.priority || 'MEDIUM',
+        assignee: t.assigneeName || '',
+        dueDate: t.dueDate || null,
+      }))
+    })
+
+    const doneTasks = tasks.filter(t => t.status === 'COMPLETED')
+    const totalPct = tasks.length > 0 ? Math.round((doneTasks.length / tasks.length) * 100) : 0
+
+    const newReport = {
+      id: Date.now(),
+      title: `${targetProject?.name || '프로젝트'} 주간 보고서`,
+      project: targetProject?.name || '프로젝트',
+      projectUuid: selectedProjectUuid,
+      date: new Date().toISOString().split('T')[0],
+      type: 'weekly',
+      summary: aiRes.data.summary || `${targetProject?.name || '프로젝트'}의 전체 태스크 중 ${totalPct}%가 완료되었습니다.`,
+      sections: aiRes.data.sections || [],
+    }
+
+    const existing = localStorage.getItem(STORAGE_KEY(selectedProjectUuid))
+    const prev = existing ? JSON.parse(existing) : []
+    const updated = [newReport, ...prev]
+    saveReports(updated, selectedProjectUuid)
+    setSelected(newReport)
+  } catch (err) {
+    const msg = err?.response?.data?.message || err?.message || String(err)
+    alert(`보고서 생성 실패: ${msg}`)
+  } finally {
+    setGenerating(false)
   }
+}
 
   const handleDeleteReport = (e, reportId) => {
     e.stopPropagation()

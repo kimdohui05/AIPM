@@ -18,7 +18,6 @@
 @keyframes spin { to { transform: rotate(360deg); } }
 
 .content { flex: 1; padding: 24px 28px; max-width: 860px; width: 100%; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
-.statsRow { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
 .statCard { background: #fff; border: 1px solid #D6EFF4; border-radius: 12px; padding: 16px 18px; display: flex; align-items: center; gap: 14px; }
 .statIcon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
 .statLabel { font-size: 11.5px; color: #527880; margin-bottom: 4px; }

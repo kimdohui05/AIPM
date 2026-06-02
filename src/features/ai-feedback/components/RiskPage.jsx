@@ -176,25 +176,6 @@ export default function RiskPage() {
         </header>
 
         <div className={styles.content}>
-          <div className={styles.statsRow}>
-            <div className={styles.statCard}>
-              <div className={styles.statIcon} style={{ background: '#FEECEC' }}>⚠️</div>
-              <div><div className={styles.statLabel}>높은 리스크</div><div className={styles.statValue} style={{ color: '#F05A5A' }}>{highCount}</div></div>
-            </div>
-            <div className={styles.statCard}>
-              <div className={styles.statIcon} style={{ background: '#FEF7E0' }}>⚡</div>
-              <div><div className={styles.statLabel}>중간 리스크</div><div className={styles.statValue} style={{ color: '#F5BC3D' }}>{midCount}</div></div>
-            </div>
-            <div className={styles.statCard}>
-              <div className={styles.statIcon} style={{ background: '#E0FAF0' }}>📋</div>
-              <div><div className={styles.statLabel}>낮은 리스크</div><div className={styles.statValue} style={{ color: '#22C98A' }}>{lowCount}</div></div>
-            </div>
-            <div className={styles.statCard}>
-              <div className={styles.statIcon} style={{ background: '#E0F7FB' }}>✅</div>
-              <div><div className={styles.statLabel}>해결 완료</div><div className={styles.statValue} style={{ color: '#3BBFD4' }}>{resolvedCount}</div></div>
-            </div>
-          </div>
-
           <div className={styles.filterRow}>
             {[{ key: 'all', label: '전체' }, { key: 'active', label: '미해결' }, { key: 'resolved', label: '해결됨' }].map(f => (
               <button
