@@ -9,14 +9,12 @@ import java.util.List;
 @Setter
 public class PmAnalysisResponseDto {
 
-    private List<RiskWarningDto> riskWarnings;
+    private List<InitialTaskDto> initialTasks;
 
     @Getter
     @Setter
-    public static class RiskWarningDto {
-        private String type;
-        private String message;
-        private String relatedTaskUuid;
-        private String relatedMember;
+    public static class InitialTaskDto {
+        private String title;
+        private String description;
     }
 }

@@ -69,63 +69,33 @@ public class GeminiService {
         StringBuilder sb = new StringBuilder();
 
         sb.append("당신은 10년 경력의 시니어 프로젝트 매니저입니다.\n");
-        sb.append("아래 프로젝트 정보, 팀원 포트폴리오, 현재 태스크 진행 상황을 분석하여\n");
-        sb.append("리스크 경고를 도출하세요.\n\n");
+        sb.append("아래 프로젝트 정보를 바탕으로 프로젝트 초반에 반드시 해야 할 작업 목록을 추천하세요.\n\n");
 
         sb.append("=== 프로젝트 정보 ===\n");
         sb.append("프로젝트명: ").append(request.getProjectName()).append("\n");
         sb.append("시작일: ").append(request.getStartDate()).append("\n");
         sb.append("마감일: ").append(request.getEndDate()).append("\n\n");
 
-        sb.append("=== 팀원 포트폴리오 ===\n");
+        sb.append("=== 팀원 목록 ===\n");
         for (PmAnalysisRequestDto.MemberDto m : request.getMembers()) {
             sb.append("- 이름: ").append(m.getName())
                     .append(" | 직급: ").append(m.getPosition());
-            if (m.getYearsOfExperience() != null) {
-                sb.append(" | 경력: ").append(m.getYearsOfExperience()).append("년");
-            }
-            if (m.getTechStack() != null && !m.getTechStack().isBlank()) {
-                sb.append(" | 기술스택: ").append(m.getTechStack());
-            }
-            if (m.getPortfolio() != null && !m.getPortfolio().isBlank()) {
-                sb.append(" | 포트폴리오: ").append(m.getPortfolio());
-            }
             sb.append("\n");
         }
         sb.append("\n");
 
-        sb.append("=== 현재 태스크 목록 ===\n");
-        for (PmAnalysisRequestDto.TaskDto t : request.getTasks()) {
-            sb.append("- UUID: ").append(t.getTaskUuid())
-                    .append(" | 제목: ").append(t.getTitle())
-                    .append(" | 상태: ").append(t.getStatus())
-                    .append(" | 우선순위: ").append(t.getPriority() != null ? t.getPriority() : "미지정")
-                    .append(" | 담당자: ").append(t.getAssignee() != null ? t.getAssignee() : "미배정")
-                    .append(" | 마감일: ").append(t.getDueDate() != null ? t.getDueDate() : "미지정");
-            if (t.getDescription() != null && !t.getDescription().isBlank()) {
-                sb.append(" | 설명: ").append(t.getDescription());
-            }
-            sb.append("\n");
-        }
-        sb.append("\n");
-
-        sb.append("=== 분석 지시사항 ===\n");
-        sb.append("다음 유형의 리스크를 탐지하세요:\n");
-        sb.append("   - DEADLINE: 마감일 기준으로 늦춰질 가능성이 있는 태스크\n");
-        sb.append("   - OVERLOAD: 특정 팀원에게 업무가 집중되어 병목이 예상되는 경우\n");
-        sb.append("   - BOTTLENECK: 다른 태스크의 선행 조건이 되는 태스크가 지연되는 경우\n");
-        sb.append("   - DEPENDENCY: 담당자 미배정으로 진행이 막힌 태스크\n\n");
+        sb.append("=== 지시사항 ===\n");
+        sb.append("프로젝트 초반(1~2주차)에 팀이 반드시 완료해야 할 셋업 및 준비 작업 5~8개를 추천하세요.\n");
+        sb.append("예: 개발 환경 세팅, 협업 도구 설정, 브랜치 전략 수립 등\n");
+        sb.append("프로젝트 성격과 팀 구성을 고려하여 실질적으로 도움이 되는 작업을 추천하세요.\n\n");
 
         sb.append("=== 출력 형식 ===\n");
-        sb.append("반드시 아래 JSON 형식으로만 응답하세요. 다른 텍스트는 절대 포함하지 마세요.\n");
-        sb.append("taskUuid는 입력에서 받은 값을 그대로 사용하세요.\n\n");
+        sb.append("반드시 아래 JSON 형식으로만 응답하세요. 다른 텍스트는 절대 포함하지 마세요.\n\n");
         sb.append("{\n");
-        sb.append("  \"riskWarnings\": [\n");
+        sb.append("  \"initialTasks\": [\n");
         sb.append("    {\n");
-        sb.append("      \"type\": \"DEADLINE\",\n");
-        sb.append("      \"message\": \"구체적인 경고 메시지\",\n");
-        sb.append("      \"relatedTaskUuid\": \"태스크 UUID 또는 null\",\n");
-        sb.append("      \"relatedMember\": \"팀원 이름 또는 null\"\n");
+        sb.append("      \"title\": \"작업 제목\",\n");
+        sb.append("      \"description\": \"작업 상세 설명\"\n");
         sb.append("    }\n");
         sb.append("  ]\n");
         sb.append("}\n");
