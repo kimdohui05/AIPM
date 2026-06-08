@@ -7,12 +7,7 @@ export default function ProfilePage() {
   const navigate = useNavigate()
   const nickname = localStorage.getItem('nickname') || ''
 
-  const [form, setForm] = useState({
-    organizationId: '',
-    position: '',
-    departmentId: '',
-    portfolio: '',
-  })
+  const [form, setForm] = useState({ portfolio: '' })
   const [loading, setLoading] = useState(false)
   const [fetchLoading, setFetchLoading] = useState(true)
 
@@ -20,15 +15,9 @@ export default function ProfilePage() {
     const fetchProfile = async () => {
       try {
         const res = await client.get('/api/user/profile')
-        const data = res.data
-        setForm({
-          organizationId: data.organizationId || '',
-          position: data.position || '',
-          departmentId: data.departmentId || '',
-          portfolio: data.portfolio || '',
-        })
-      } catch (error) {
-        alert('프로필을 불러오는데 실패했습니다.')
+        setForm({ portfolio: res.data.portfolio || '' })
+      } catch {
+        // 에러 무시 - alert 제거로 오류 모달 안 뜸
       } finally {
         setFetchLoading(false)
       }
@@ -36,24 +25,16 @@ export default function ProfilePage() {
     fetchProfile()
   }, [])
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value })
-  }
+  const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value })
 
   const handleProfileSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
     try {
-      await client.put('/api/user/profile', {
-        organizationId: form.organizationId,
-        departmentId: form.departmentId,
-        position: form.position,
-        portfolio: form.portfolio,
-      })
-      alert('프로필이 저장됐습니다!')
+      await client.put('/api/user/profile', { portfolio: form.portfolio })
       navigate('/dashboard', { state: { openProfile: true } })
-    } catch (error) {
-      alert('저장에 실패했습니다.')
+    } catch {
+      // 에러 무시
     } finally {
       setLoading(false)
     }
@@ -64,7 +45,6 @@ export default function ProfilePage() {
   return (
     <div className={styles.container}>
 
-      {/* 7. 헤더 - 로고 눌러서 돌아가기 */}
       <header className={styles.header}>
         <div className={styles.headerLeft}>
           <div
@@ -76,7 +56,7 @@ export default function ProfilePage() {
               background: 'linear-gradient(135deg, #3BBFD4, #1E9CB5)',
               display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px'
             }}>🤖</div>
-            <span style={{ fontSize: '15px', fontWeight: 700, color: '#0F2A31' }}>AI PM</span>
+            <span style={{ fontSize: '15px', fontWeight: 700, color: '#0F2A31' }}>UNIP</span>
             <span style={{ fontSize: '9px', fontWeight: 600, background: '#3BBFD4', color: '#fff', padding: '2px 6px', borderRadius: '4px' }}>BETA</span>
           </div>
           <div>
@@ -87,8 +67,6 @@ export default function ProfilePage() {
       </header>
 
       <div className={styles.content}>
-
-        {/* 프로필 카드 */}
         <div className={styles.card}>
           <div className={styles.cardHeader}>
             <span className={styles.cardTitle}>프로필 정보</span>
@@ -96,56 +74,13 @@ export default function ProfilePage() {
           <div className={styles.cardBody}>
 
             <div className={styles.avatarSection}>
-              <div className={styles.avatar}>
-                {nickname.charAt(0) || '?'}
-              </div>
+              <div className={styles.avatar}>{nickname.charAt(0) || '?'}</div>
               <div>
                 <div className={styles.avatarName}>{nickname}</div>
-                <label className={styles.avatarBtn} htmlFor="profileImg">
-                  사진 변경
-                </label>
-                <input
-                  id="profileImg"
-                  type="file"
-                  accept="image/*"
-                  style={{ display: 'none' }}
-                />
               </div>
             </div>
 
             <form onSubmit={handleProfileSubmit} className={styles.form}>
-              <div className={styles.formRow}>
-                <div className={styles.formGroup}>
-                  <label>소속 회사</label>
-                  <input
-                    type="text"
-                    name="organizationId"
-                    value={form.organizationId}
-                    onChange={handleChange}
-                    placeholder="소속 회사명"
-                  />
-                </div>
-                <div className={styles.formGroup}>
-                  <label>직급</label>
-                  <input
-                    type="text"
-                    name="position"
-                    value={form.position}
-                    onChange={handleChange}
-                    placeholder="예: 사원, 대리, 과장"
-                  />
-                </div>
-              </div>
-              <div className={styles.formGroup}>
-                <label>부서</label>
-                <input
-                  type="text"
-                  name="departmentId"
-                  value={form.departmentId}
-                  onChange={handleChange}
-                  placeholder="예: 개발팀, 디자인팀"
-                />
-              </div>
               <div className={styles.formGroup}>
                 <label>포트폴리오</label>
                 <textarea
@@ -164,9 +99,6 @@ export default function ProfilePage() {
             </form>
           </div>
         </div>
-
-        {/* 8. 비밀번호 변경 카드 제거 */}
-
       </div>
     </div>
   )

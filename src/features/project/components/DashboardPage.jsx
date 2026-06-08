@@ -159,7 +159,7 @@ export default function DashboardPage() {
       <aside className={styles.sidebar}>
         <div className={styles.logo} onClick={() => navigate('/dashboard')} style={{ cursor: 'pointer' }}>
           <div className={styles.logoIcon}>🤖</div>
-          <span className={styles.logoText}>AI PM</span>
+          <span className={styles.logoText}>UNIP</span>
           <span className={styles.logoBadge}>BETA</span>
         </div>
         <div className={styles.navSection}>
@@ -167,12 +167,10 @@ export default function DashboardPage() {
           <div className={styles.navItem} onClick={() => navigate('/dashboard')}><span>⬛</span> 대시보드</div>
           <div className={styles.navItem} onClick={() => projects.length > 0 && navigate(`/projects/${currentProjectUuid(projects)}/tasks`)}><span>✅</span> 태스크</div>
           <div className={styles.navItem} onClick={() => projects.length > 0 && navigate(`/projects/${currentProjectUuid(projects)}/risks`)}><span>⚠️</span> 리스크</div>
-          <div className={styles.navItem} onClick={() => projects.length > 0 && navigate(`/projects/${currentProjectUuid(projects)}/reports`)}><span>📊</span> 보고서</div>
         </div>
         <div className={styles.sidebarDivider} />
         <div className={styles.navSection}>
           <div className={styles.navLabel}>설정</div>
-          <div className={styles.navItem} onClick={() => navigate('/settings/company')}><span>🏢</span> 회사 설정</div>
           <div className={styles.navItem} onClick={() => navigate('/settings/integration')}><span>🔗</span> 연동 설정</div>
         </div>
         <div className={styles.sidebarBottom}>
@@ -199,7 +197,6 @@ export default function DashboardPage() {
 
         <div className={styles.content}>
 
-          {/* 통계 카드 */}
           <div className={styles.statsRow}>
             <div className={styles.statCard}>
               <div><div className={styles.statLabel}>전체 프로젝트</div><div className={styles.statValue}>{projects.length}</div><div className={styles.statSub}>진행 중 {projects.length} · 완료 0</div></div>
@@ -219,7 +216,6 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* 시각화 차트 */}
           {allTasks.length > 0 && (
             <div className={styles.chartRow}>
               <div className={styles.card}>
@@ -248,7 +244,6 @@ export default function DashboardPage() {
                   </div>
                 </div>
               </div>
-
               <div className={styles.card}>
                 <div className={styles.cardHeader}>
                   <span className={styles.cardTitle}>📊 프로젝트별 완료율</span>
@@ -268,7 +263,6 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* 프로젝트 목록 */}
           {projects.length > 0 && (
             <div className={styles.card}>
               <div className={styles.cardHeader}>
@@ -296,7 +290,6 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* 간트차트 */}
           <div className={styles.card}>
             <div className={styles.cardHeader}>
               <span className={styles.cardTitle}>📅 간트차트</span>
@@ -332,12 +325,12 @@ export default function DashboardPage() {
             <div className={styles.panelBody}>
               <div className={styles.panelAvatar}>{nickname.charAt(0)}</div>
               <div className={styles.panelNickname}>{nickname}</div>
-              <div className={styles.panelInfo}>
-                <div className={styles.panelInfoItem}><span className={styles.panelInfoLabel}>닉네임</span><span className={styles.panelInfoValue}>{profile?.nickname || nickname}</span></div>
-                <div className={styles.panelInfoItem}><span className={styles.panelInfoLabel}>소속 회사</span><span className={styles.panelInfoValue}>{profile?.organizationId || '-'}</span></div>
-                <div className={styles.panelInfoItem}><span className={styles.panelInfoLabel}>직급</span><span className={styles.panelInfoValue}>{profile?.position || '-'}</span></div>
-                <div className={styles.panelInfoItem}><span className={styles.panelInfoLabel}>부서</span><span className={styles.panelInfoValue}>{profile?.departmentId || '-'}</span></div>
+            <div className={styles.panelInfo}>
+              <div className={styles.panelInfoItem}>
+                <span className={styles.panelInfoLabel}>닉네임</span>
+                <span className={styles.panelInfoValue}>{nickname}</span>
               </div>
+            </div>
               <button className={styles.panelEditBtn} onClick={() => { setShowProfile(false); navigate('/profile') }}>✏️ 프로필 수정하기</button>
               <button className={styles.panelEditBtn} style={{ marginTop: '8px', background: 'transparent', color: '#ef4444', border: '1px solid #ef4444' }} onClick={() => { localStorage.clear(); navigate('/login') }}>로그아웃</button>
             </div>

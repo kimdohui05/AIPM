@@ -127,13 +127,13 @@ export default function RiskPage() {
         return saved ? JSON.parse(saved) : []
       })()
 
-      const newRisks = (res.data.riskWarnings || []).map((w, i) => ({
+      const newRisks = (res.data.initialTasks || []).map((w, i) => ({
         id: Date.now() + i,
-        type: TYPE_MAP[w.type] || 'technical',
-        severity: (w.severity || 'MEDIUM').toLowerCase(),
-        title: w.message,
-        desc: w.relatedMember ? `관련 팀원: ${w.relatedMember}` : '',
-        rec: getRec(w.type),
+        type: 'technical',
+        severity: 'medium',
+        title: w.title || w.description || '분석 결과',
+        desc: w.description || '',
+        rec: '해당 태스크를 검토하고 담당자와 상황을 공유하세요.',
         project: targetProject?.name || '현재 프로젝트',
         detectedAt: new Date().toLocaleString('ko-KR'),
         resolved: false,
@@ -275,12 +275,12 @@ export default function RiskPage() {
             <div className={styles.panelBody}>
               <div className={styles.panelAvatar}>{nickname.charAt(0)}</div>
               <div className={styles.panelNickname}>{nickname}</div>
-              <div className={styles.panelInfo}>
-                <div className={styles.panelInfoItem}><span className={styles.panelInfoLabel}>닉네임</span><span className={styles.panelInfoValue}>{nickname}</span></div>
-                <div className={styles.panelInfoItem}><span className={styles.panelInfoLabel}>소속 회사</span><span className={styles.panelInfoValue}>-</span></div>
-                <div className={styles.panelInfoItem}><span className={styles.panelInfoLabel}>직급</span><span className={styles.panelInfoValue}>-</span></div>
-                <div className={styles.panelInfoItem}><span className={styles.panelInfoLabel}>부서</span><span className={styles.panelInfoValue}>-</span></div>
+            <div className={styles.panelInfo}>
+              <div className={styles.panelInfoItem}>
+                <span className={styles.panelInfoLabel}>닉네임</span>
+                <span className={styles.panelInfoValue}>{nickname}</span>
               </div>
+            </div>
               <button className={styles.panelEditBtn} onClick={() => { setShowProfile(false); navigate('/profile') }}>✏️ 프로필 수정하기</button>
             </div>
           </div>

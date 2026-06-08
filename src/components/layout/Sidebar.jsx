@@ -18,7 +18,7 @@ export default function Sidebar({ onProfileClick }) {
     <aside className={styles.sidebar}>
       <div className={styles.logo} onClick={() => navigate('/dashboard')} style={{ cursor: 'pointer' }}>
         <div className={styles.logoIcon}>🤖</div>
-        <span className={styles.logoText}>AI PM</span>
+        <span className={styles.logoText}>UNIP</span>
         <span className={styles.logoBadge}>BETA</span>
       </div>
 
@@ -33,18 +33,12 @@ export default function Sidebar({ onProfileClick }) {
         <div className={styles.navItem} onClick={() => goTo('/projects/:id/risks')}>
           <span>⚠️</span> 리스크
         </div>
-        <div className={styles.navItem} onClick={() => goTo('/projects/:id/reports')}>
-          <span>📊</span> 보고서
-        </div>
       </div>
 
       <div className={styles.sidebarDivider} />
 
       <div className={styles.navSection}>
         <div className={styles.navLabel}>설정</div>
-        <div className={styles.navItem} onClick={() => navigate('/settings/company')}>
-          <span>🏢</span> 회사 설정
-        </div>
         <div className={styles.navItem} onClick={() => navigate('/settings/integration')}>
           <span>🔗</span> 연동 설정
         </div>

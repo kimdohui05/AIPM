@@ -164,12 +164,3 @@
   border-radius: 8px;
   border: 2px dashed #3BBFD4;
 }
-.filterRow { display: flex; gap: 6px; padding: 12px 28px 0; }
-.filterBtn {
-  padding: 5px 12px; border-radius: 8px;
-  border: 1.5px solid #D6EFF4; background: #fff;
-  font-size: 12px; font-weight: 600; color: #527880;
-  cursor: pointer; font-family: inherit; transition: all 0.13s;
-}
-.filterBtn:hover { border-color: #3BBFD4; color: #1E9CB5; }
-.filterActive { background: #E0F7FB; border-color: #3BBFD4; color: #1E9CB5; }

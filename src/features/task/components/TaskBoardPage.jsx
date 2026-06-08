@@ -40,22 +40,6 @@ const mapTask = (t) => ({
   progress: t.progress ?? 0,
 })
 
-const isOverdue = (due, status) => {
-  if (!due || status === 'done') return false
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  return new Date(due) < today
-}
-
-const isUrgent = (due, status) => {
-  if (!due || status === 'done') return false
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  const dueDate = new Date(due)
-  const diff = Math.ceil((dueDate - today) / (1000 * 60 * 60 * 24))
-  return diff >= 0 && diff <= 3
-}
-
 export default function TaskBoardPage() {
   const navigate = useNavigate()
   const { id } = useParams()
@@ -68,8 +52,7 @@ export default function TaskBoardPage() {
   const [showProfile, setShowProfile] = useState(false)
   const [aiGenerating, setAiGenerating] = useState(!!location.state?.aiGenerating)
   const [dragOverCol, setDragOverCol] = useState(null)
-  const [deleteTarget, setDeleteTarget] = useState(null)
-  const [filterPriority, setFilterPriority] = useState('all')
+  const [deleteTarget, setDeleteTarget] = useState(null) // 삭제 모달용
   const dragTaskUuid = useRef(null)
   const pollRef = useRef(null)
   const nickname = localStorage.getItem('nickname') || '사용자'
@@ -113,11 +96,7 @@ export default function TaskBoardPage() {
     { key: 'done', label: '완료', color: '#22C98A' },
   ]
 
-  const getTasksByStatus = (status) => tasks.filter(t => {
-    if (t.status !== status) return false
-    if (filterPriority === 'all') return true
-    return t.priority === filterPriority
-  })
+  const getTasksByStatus = (status) => tasks.filter(t => t.status === status)
 
   const handleDragStart = (e, taskUuid) => {
     dragTaskUuid.current = taskUuid
@@ -164,8 +143,11 @@ export default function TaskBoardPage() {
   }
 
   const openEdit = (task) => { setEditTask({ ...task }); setShowModal(true) }
+
+  // 삭제 모달 열기
   const handleDeleteClick = (task) => setDeleteTarget(task)
 
+  // 실제 삭제 실행
   const handleDeleteConfirm = async () => {
     if (!deleteTarget) return
     try {
@@ -228,8 +210,6 @@ export default function TaskBoardPage() {
     return COLORS[names.indexOf(name) % COLORS.length]
   }
 
-  const totalFiltered = tasks.filter(t => filterPriority === 'all' || t.priority === filterPriority).length
-
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#F0F8FA' }}>
       <Sidebar onProfileClick={() => setShowProfile(true)} />
@@ -240,7 +220,7 @@ export default function TaskBoardPage() {
             <div>
               <h1 className={styles.headerTitle}>{project?.name || '태스크 보드'}</h1>
               <p className={styles.headerSub}>
-                총 {totalFiltered}개 태스크
+                총 {tasks.length}개 태스크
                 {project?.endDate && ` · 마감일 ${project.endDate}`}
               </p>
             </div>
@@ -265,24 +245,6 @@ export default function TaskBoardPage() {
             </button>
           </div>
         </header>
-
-        {/* 우선순위 필터 */}
-        <div className={styles.filterRow}>
-          {[
-            { key: 'all', label: '전체' },
-            { key: 'high', label: '🔴 높음' },
-            { key: 'medium', label: '🟡 중간' },
-            { key: 'low', label: '🟢 낮음' },
-          ].map(f => (
-            <button
-              key={f.key}
-              className={`${styles.filterBtn} ${filterPriority === f.key ? styles.filterActive : ''}`}
-              onClick={() => setFilterPriority(f.key)}
-            >
-              {f.label}
-            </button>
-          ))}
-        </div>
 
         {aiGenerating && (
           <div style={{ textAlign: 'center', padding: '16px', color: '#3BBFD4', fontSize: '14px', fontWeight: 600 }}>
@@ -314,72 +276,57 @@ export default function TaskBoardPage() {
                   <span className={styles.columnCount}>{getTasksByStatus(col.key).length}</span>
                 </div>
                 <div className={styles.columnBody}>
-                  {getTasksByStatus(col.key).map(task => {
-                    const overdue = isOverdue(task.due, task.status)
-                    const urgent = isUrgent(task.due, task.status)
-                    return (
-                      <div
-                        key={task.uuid}
-                        className={styles.taskCard}
-                        style={{ borderColor: overdue ? '#F05A5A' : urgent ? '#F5BC3D' : undefined }}
-                        draggable
-                        onDragStart={e => handleDragStart(e, task.uuid)}
-                        onDragEnd={handleDragEnd}
-                      >
-                        <div className={styles.taskCardTop}>
-                          <span className={`${styles.priorityBadge} ${styles[PRIORITY_CLASS[task.priority]]}`}>
-                            {PRIORITY_LABEL[task.priority]}
-                          </span>
-                          <div className={styles.taskActions}>
-                            <button onClick={() => openEdit(task)}>✏️</button>
-                            <button onClick={() => handleDeleteClick(task)}>🗑️</button>
-                          </div>
-                        </div>
-                        <div className={styles.taskTitle}>{task.title}</div>
-                        {task.description && <div className={styles.taskDesc}>{task.description}</div>}
-                        <div
-                          className={styles.taskDue}
-                          style={{
-                            color: overdue ? '#F05A5A' : urgent ? '#F5BC3D' : '#9BBEC5',
-                            fontWeight: (overdue || urgent) ? 600 : 400
-                          }}
-                        >
-                          {overdue ? '🚨' : urgent ? '⚠️' : '📅'} {task.due}
-                          {overdue && ' · 마감 초과'}
-                          {urgent && !overdue && ' · 마감 임박'}
-                        </div>
-                        {task.status === 'in-progress' && (
-                          <div className={styles.progressWrap}>
-                            <div className={styles.progressBar}>
-                              <div className={styles.progressFill} style={{ width: `${task.progress}%` }} />
-                            </div>
-                            <input
-                              className={styles.progressInput}
-                              type="number" min={0} max={100}
-                              value={task.progress}
-                              onChange={e => changeProgress(task.uuid, e.target.value)}
-                            />
-                            <span className={styles.progressPct}>%</span>
-                          </div>
-                        )}
-                        <div className={styles.taskCardBottom}>
-                          <div className={styles.assignee} style={{ background: memberColor(task.assignee) }}>
-                            {task.assignee ? task.assignee.charAt(0) : '?'}
-                          </div>
-                          <span className={styles.assigneeName}>{task.assignee}</span>
-                          <select
-                            className={styles.statusSelect}
-                            value={task.status}
-                            onChange={e => changeStatus(task.uuid, e.target.value)}
-                          >
-                            <option value="todo">대기</option>
-                            <option value="in-progress">진행중</option>
-                            <option value="done">완료</option>
-                          </select>
+                  {getTasksByStatus(col.key).map(task => (
+                    <div
+                      key={task.uuid}
+                      className={styles.taskCard}
+                      draggable
+                      onDragStart={e => handleDragStart(e, task.uuid)}
+                      onDragEnd={handleDragEnd}
+                    >
+                      <div className={styles.taskCardTop}>
+                        <span className={`${styles.priorityBadge} ${styles[PRIORITY_CLASS[task.priority]]}`}>
+                          {PRIORITY_LABEL[task.priority]}
+                        </span>
+                        <div className={styles.taskActions}>
+                          <button onClick={() => openEdit(task)}>✏️</button>
+                          <button onClick={() => handleDeleteClick(task)}>🗑️</button>
                         </div>
                       </div>
-                    )
-                  })}
+                      <div className={styles.taskTitle}>{task.title}</div>
+                      {task.description && <div className={styles.taskDesc}>{task.description}</div>}
+                      <div className={styles.taskDue}>📅 {task.due}</div>
+                      {task.status === 'in-progress' && (
+                        <div className={styles.progressWrap}>
+                          <div className={styles.progressBar}>
+                            <div className={styles.progressFill} style={{ width: `${task.progress}%` }} />
+                          </div>
+                          <input
+                            className={styles.progressInput}
+                            type="number" min={0} max={100}
+                            value={task.progress}
+                            onChange={e => changeProgress(task.uuid, e.target.value)}
+                          />
+                          <span className={styles.progressPct}>%</span>
+                        </div>
+                      )}
+                      <div className={styles.taskCardBottom}>
+                        <div className={styles.assignee} style={{ background: memberColor(task.assignee) }}>
+                          {task.assignee ? task.assignee.charAt(0) : '?'}
+                        </div>
+                        <span className={styles.assigneeName}>{task.assignee}</span>
+                        <select
+                          className={styles.statusSelect}
+                          value={task.status}
+                          onChange={e => changeStatus(task.uuid, e.target.value)}
+                        >
+                          <option value="todo">대기</option>
+                          <option value="in-progress">진행중</option>
+                          <option value="done">완료</option>
+                        </select>
+                      </div>
+                    </div>
+                  ))}
                   {getTasksByStatus(col.key).length === 0 && (
                     <div className={`${styles.emptyCol} ${dragOverCol === col.key ? styles.emptyColDragOver : ''}`}>
                       <p>{dragOverCol === col.key ? '여기에 놓기' : '태스크 없음'}</p>
@@ -467,16 +414,24 @@ export default function TaskBoardPage() {
                 <button onClick={() => setDeleteTarget(null)}>✕</button>
               </div>
               <div className={styles.modalBody}>
-                <p style={{ fontSize: '14px', color: '#0F2A31', marginBottom: '6px' }}>아래 태스크를 삭제할까요?</p>
+                <p style={{ fontSize: '14px', color: '#0F2A31', marginBottom: '6px' }}>
+                  아래 태스크를 삭제할까요?
+                </p>
                 <div style={{ background: '#F7FCFD', border: '1px solid #D6EFF4', borderRadius: '8px', padding: '12px 14px' }}>
                   <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#0F2A31' }}>{deleteTarget.title}</div>
                   {deleteTarget.assignee && <div style={{ fontSize: '12px', color: '#9BBEC5', marginTop: '4px' }}>담당자: {deleteTarget.assignee}</div>}
                 </div>
-                <p style={{ fontSize: '12px', color: '#F05A5A', marginTop: '10px', textAlign: 'center' }}>삭제 후 복구할 수 없습니다.</p>
+                <p style={{ fontSize: '12px', color: '#F05A5A', marginTop: '10px', textAlign: 'center'}}>삭제 후 복구할 수 없습니다.</p>
               </div>
               <div className={styles.modalFooter}>
                 <button className={styles.cancelBtn} onClick={() => setDeleteTarget(null)}>취소</button>
-                <button className={styles.deleteBtn} onClick={handleDeleteConfirm}>삭제</button>
+                <button
+                  className={styles.saveBtn}
+                  style={{ background: 'linear-gradient(135deg, #F05A5A, #e04444)' }}
+                  onClick={handleDeleteConfirm}
+                >
+                  삭제
+                </button>
               </div>
             </div>
           </div>
@@ -494,14 +449,14 @@ export default function TaskBoardPage() {
             <div className={styles.panelBody}>
               <div className={styles.panelAvatar}>{nickname.charAt(0)}</div>
               <div className={styles.panelNickname}>{nickname}</div>
-              <div className={styles.panelInfo}>
-                <div className={styles.panelInfoItem}><span className={styles.panelInfoLabel}>닉네임</span><span className={styles.panelInfoValue}>{nickname}</span></div>
-                <div className={styles.panelInfoItem}><span className={styles.panelInfoLabel}>소속 회사</span><span className={styles.panelInfoValue}>-</span></div>
-                <div className={styles.panelInfoItem}><span className={styles.panelInfoLabel}>직급</span><span className={styles.panelInfoValue}>-</span></div>
-                <div className={styles.panelInfoItem}><span className={styles.panelInfoLabel}>부서</span><span className={styles.panelInfoValue}>-</span></div>
+            <div className={styles.panelInfo}>
+              <div className={styles.panelInfoItem}>
+                <span className={styles.panelInfoLabel}>닉네임</span>
+                <span className={styles.panelInfoValue}>{nickname}</span>
               </div>
+            </div>
               <button className={styles.panelEditBtn} onClick={() => { setShowProfile(false); navigate('/profile') }}>
-                ✏️ 프로필 수정하기
+                프로필 수정하기
               </button>
             </div>
           </div>

@@ -135,12 +135,12 @@ const handleDisconnect = (id) => {
             <div className={styles.panelBody}>
               <div className={styles.panelAvatar}>{nickname.charAt(0)}</div>
               <div className={styles.panelNickname}>{nickname}</div>
-              <div className={styles.panelInfo}>
-                <div className={styles.panelInfoItem}><span className={styles.panelInfoLabel}>닉네임</span><span className={styles.panelInfoValue}>{nickname}</span></div>
-                <div className={styles.panelInfoItem}><span className={styles.panelInfoLabel}>소속 회사</span><span className={styles.panelInfoValue}>-</span></div>
-                <div className={styles.panelInfoItem}><span className={styles.panelInfoLabel}>직급</span><span className={styles.panelInfoValue}>-</span></div>
-                <div className={styles.panelInfoItem}><span className={styles.panelInfoLabel}>부서</span><span className={styles.panelInfoValue}>-</span></div>
+            <div className={styles.panelInfo}>
+              <div className={styles.panelInfoItem}>
+                <span className={styles.panelInfoLabel}>닉네임</span>
+                <span className={styles.panelInfoValue}>{nickname}</span>
               </div>
+            </div>
               <button className={styles.panelEditBtn} onClick={() => { setShowProfile(false); navigate('/profile') }}>✏️ 프로필 수정하기</button>
             </div>
           </div>

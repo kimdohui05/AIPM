@@ -92,7 +92,7 @@
     border-top: 1px solid rgba(255,255,255,0.1);
   }
   .sidebar::before { display: none; }
-  .logo { padding: 0; margin-right: auto; }
+  .logo { padding: 0 22px 14px; display: flex; align-items: center; gap: 9px;}  
   .logoBadge { display: none; }
   .navSection { display: flex; flex-direction: row; gap: 4px; margin: 0; }
   .navLabel { display: none; }
