@@ -90,9 +90,9 @@
 }
 .featureGrid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 20px;
-  max-width: 960px;
+  max-width: 760px;
   margin: 0 auto;
 }
 .featureCard {
