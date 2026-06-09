@@ -11,18 +11,6 @@ const TYPE_MAP = {
   DEPENDENCY: 'communication',
 }
 const TYPE_ICON = { schedule: '🕐', resource: '👥', technical: '⚙️', communication: '💬' }
-const TYPE_LABEL = { schedule: '일정', resource: '리소스', technical: '기술', communication: '커뮤니케이션' }
-const SEVERITY_LABEL = { high: '높음', medium: '중간', low: '낮음' }
-
-const getRec = (type) => {
-  switch (type) {
-    case 'DEADLINE': return '태스크 우선순위를 재조정하고 일정을 검토하세요.'
-    case 'OVERLOAD': return '태스크를 다른 팀원에게 재배분하세요.'
-    case 'BOTTLENECK': return '선행 태스크를 먼저 완료하여 병목을 해소하세요.'
-    case 'DEPENDENCY': return '태스크 담당자를 빠르게 배정하세요.'
-    default: return '담당 팀원과 상황을 공유하세요.'
-  }
-}
 
 const STORAGE_KEY = (id) => `risks_api_${id}`
 
@@ -80,7 +68,6 @@ export default function RiskPage() {
     setAnalyzing(true)
     try {
       const targetProject = allProjects.find(p => p.uuid === selectedProjectUuid) || project
-
       const taskRes = await client.get(`/api/task/project/${selectedProjectUuid}`)
       const tasks = taskRes.data || []
 
@@ -129,13 +116,10 @@ export default function RiskPage() {
 
       const newRisks = (res.data.initialTasks || []).map((w, i) => ({
         id: Date.now() + i,
-        type: 'technical',
-        severity: 'medium',
+        type: TYPE_MAP[w.type] || 'technical',
         title: w.title || w.description || '분석 결과',
         desc: w.description || '',
-        rec: '해당 태스크를 검토하고 담당자와 상황을 공유하세요.',
         project: targetProject?.name || '현재 프로젝트',
-        detectedAt: new Date().toLocaleString('ko-KR'),
         resolved: false,
       }))
 
@@ -149,13 +133,8 @@ export default function RiskPage() {
     }
   }
 
-  const highCount = risks.filter(r => r.severity === 'high' && !r.resolved).length
-  const midCount = risks.filter(r => r.severity === 'medium' && !r.resolved).length
-  const lowCount = risks.filter(r => r.severity === 'low' && !r.resolved).length
-  const resolvedCount = risks.filter(r => r.resolved).length
-
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#F0F8FA' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', background: '#fff' }}>
       <Sidebar onProfileClick={() => setShowProfile(true)} />
       <div className={styles.container}>
 
@@ -196,23 +175,17 @@ export default function RiskPage() {
           ) : (
             <div className={styles.riskList}>
               {filtered.map(risk => (
-                <div key={risk.id} className={`${styles.riskCard} ${styles['severity_' + risk.severity]} ${risk.resolved ? styles.resolved : ''}`}>
+                <div key={risk.id} className={`${styles.riskCard} ${risk.resolved ? styles.resolved : ''}`}>
                   <div className={styles.riskCardHeader}>
                     <span className={styles.riskTypeIcon}>{TYPE_ICON[risk.type] || '⚠️'}</span>
                     <div className={styles.riskTitleWrap}>
                       <div className={styles.riskTitle}>{risk.title}</div>
                       <div className={styles.riskMeta}>
                         <span className={styles.riskProject}>📁 {risk.project}</span>
-                        <span className={styles.riskTime}>🕐 {risk.detectedAt}</span>
                       </div>
-                    </div>
-                    <div className={styles.riskBadges}>
-                      <span className={styles.typeBadge}>{TYPE_LABEL[risk.type] || risk.type}</span>
-                      <span className={`${styles.severityBadge} ${styles['sev_' + risk.severity]}`}>{SEVERITY_LABEL[risk.severity] || risk.severity}</span>
                     </div>
                   </div>
                   {risk.desc && <p className={styles.riskDesc}>{risk.desc}</p>}
-                  <div className={styles.riskRec}><span>💡</span><span>{risk.rec}</span></div>
                   <div className={styles.riskFooter}>
                     {risk.resolved
                       ? <span className={styles.resolvedBadge}>✓ 해결됨</span>
@@ -228,7 +201,6 @@ export default function RiskPage() {
         </div>
       </div>
 
-      {/* 프로젝트 선택 모달 */}
       {showProjectModal && (
         <div className={styles.modalOverlay} onClick={() => setShowProjectModal(false)}>
           <div className={styles.modal} onClick={e => e.stopPropagation()}>
@@ -275,12 +247,12 @@ export default function RiskPage() {
             <div className={styles.panelBody}>
               <div className={styles.panelAvatar}>{nickname.charAt(0)}</div>
               <div className={styles.panelNickname}>{nickname}</div>
-            <div className={styles.panelInfo}>
-              <div className={styles.panelInfoItem}>
-                <span className={styles.panelInfoLabel}>닉네임</span>
-                <span className={styles.panelInfoValue}>{nickname}</span>
+              <div className={styles.panelInfo}>
+                <div className={styles.panelInfoItem}>
+                  <span className={styles.panelInfoLabel}>닉네임</span>
+                  <span className={styles.panelInfoValue}>{nickname}</span>
+                </div>
               </div>
-            </div>
               <button className={styles.panelEditBtn} onClick={() => { setShowProfile(false); navigate('/profile') }}>✏️ 프로필 수정하기</button>
             </div>
           </div>

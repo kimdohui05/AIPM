@@ -31,9 +31,9 @@
 .riskList { display: flex; flex-direction: column; gap: 12px; }
 .riskCard { background: #fff; border: 1.5px solid #D6EFF4; border-radius: 14px; padding: 18px 20px; transition: all 0.13s; }
 .riskCard:hover { box-shadow: 0 3px 16px rgba(0,0,0,0.07); }
-.severity_high { border-color: #F8C8C8; background: #FFF8F8; }
-.severity_medium { border-color: #F5E0A0; background: #FFFCF0; }
-.severity_low { border-color: #B8EDD5; background: #F5FDF9; }
+.severity_high { border-color: #F8C8C8; }
+.severity_medium { border-color: #D6EFF4; }
+.severity_low { border-color: #B8EDD5; }
 .resolved { opacity: 0.6; }
 
 .riskCardHeader { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
