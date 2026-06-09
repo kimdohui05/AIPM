@@ -82,7 +82,7 @@ export default function SignUpPage() {
       <div className={styles.wrap}>
 
         <div className={styles.logo}>
-          <h1 className={styles.logoTitle}>AI PM</h1>
+          <h1 className={styles.logoTitle}>UNIP</h1>
           <p className={styles.logoSub}>AI가 PM 역할을 대신해드립니다</p>
         </div>
 
